@@ -45,7 +45,7 @@ export const Screen05Login: React.FC = () => {
           }, 300);
         } else {
           setTimeout(() => {
-            setPinError('Invalid PIN. Please enter 775533');
+            setPinError('Invalid PIN. Please try again.');
             setPin('');
           }, 300);
         }
@@ -66,7 +66,7 @@ export const Screen05Login: React.FC = () => {
     if (password === '775533' || password === '••••••••••••') {
       completeLogin();
     } else {
-      showToast('Incorrect password. Use PIN: 775533');
+      showToast('Incorrect password. Please try again.');
     }
   };
 
@@ -155,7 +155,7 @@ export const Screen05Login: React.FC = () => {
           {activeTab === 'pin' && (
             <div className="flex flex-col items-center">
               <p className="text-xs text-black font-semibold mb-3">
-                Enter your 6-digit PIN <span className="text-slate-400 font-normal">(775533)</span>
+                Enter your 6-digit PIN
               </p>
 
               {/* 6 Digit boxes */}
