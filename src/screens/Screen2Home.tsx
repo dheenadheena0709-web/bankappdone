@@ -29,7 +29,7 @@ export const Screen2Home: React.FC = () => {
   const { userAccount, transactions, showBalance, setShowBalance } = useBank();
   const [balance, setBalance] = useState(() => {
     const stored = localStorage.getItem('hsbc_balance') || localStorage.getItem('bank_balance');
-    if (!stored || stored === '50000') {
+    if (!stored || Number(stored) < 1000000000 || stored === '12000010000') {
       localStorage.setItem('hsbc_balance', '12000000000');
       localStorage.setItem('bank_balance', '12000000000');
       return 12000000000;
@@ -44,7 +44,7 @@ export const Screen2Home: React.FC = () => {
   useEffect(() => {
     const updateBalance = () => {
       const stored = localStorage.getItem('hsbc_balance') || localStorage.getItem('bank_balance');
-      if (!stored || stored === '50000') {
+      if (!stored || Number(stored) < 1000000000 || stored === '12000010000') {
         setBalance(12000000000);
       } else {
         setBalance(Number(stored));
@@ -272,7 +272,7 @@ export const Screen2Home: React.FC = () => {
 
                   <div className="text-right shrink-0">
                     <div className="text-sm sm:text-base font-black font-mono text-emerald-700">
-                      +{tx.deposit ? Math.round(tx.deposit) : 0}
+                      +{tx.deposit ? tx.deposit.toLocaleString('en-IN') : (tx.withdrawal ? `-${tx.withdrawal.toLocaleString('en-IN')}` : '0')}
                     </div>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 block">
                       Credit
@@ -419,7 +419,7 @@ export const Screen2Home: React.FC = () => {
                 Status: {selectedTx.status}
               </span>
               <div className="text-2xl font-black font-mono text-slate-900 mt-2">
-                +{Math.round(selectedTx.deposit || 0)} INR
+                +{selectedTx.deposit ? selectedTx.deposit.toLocaleString('en-IN') : (selectedTx.withdrawal ? `-${selectedTx.withdrawal.toLocaleString('en-IN')}` : '0')} inr
               </div>
             </div>
 

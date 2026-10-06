@@ -44,19 +44,19 @@ export const FIXED_BALANCE_DISPLAY = '12,00,00,00,000';
 export const INITIAL_LEDGER_TRANSACTIONS: Transaction[] = [
   {
     id: 'tx-swift-greenleaf-01',
-    date: '23/10/2026',
+    date: '23/09/2026',
     time: '11:43 AM',
     senderName: 'GREEN LEAF',
     transferMode: 'SWIFT',
     status: 'Success',
-    narration: 'SWIFT INWARD REMITTANCE / SENDER: GREEN LEAF / VALUE DT: 23-OCT-2026',
-    refNo: 'SWIFT-GL-23102026-88910',
+    narration: 'SWIFT INWARD REMITTANCE / SENDER: GREEN LEAF / VALUE DT: 23-SEP-2026',
+    refNo: 'SWIFT-GL-23092026-88910',
     withdrawal: null,
     deposit: 12000000000.00,
     balance: 12000000000.00,
     category: 'Inward Remittance',
     type: 'credit',
-    amountText: '12000000000'
+    amountText: '12,00,00,00,000'
   },
   {
     id: 'tx-opening-deposit-01',
@@ -72,7 +72,7 @@ export const INITIAL_LEDGER_TRANSACTIONS: Transaction[] = [
     balance: 10000.00,
     category: 'Acc Opening Deposit',
     type: 'credit',
-    amountText: '10000'
+    amountText: '10,000'
   }
 ];
 

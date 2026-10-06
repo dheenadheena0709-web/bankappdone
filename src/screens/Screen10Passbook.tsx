@@ -168,7 +168,7 @@ export const Screen10Passbook: React.FC = () => {
               </div>
               <div className="text-right">
                 <span className="text-slate-400 block text-[9px]">PRINT DATE:</span>
-                <span className="font-mono font-bold">23/10/2026</span>
+                <span className="font-mono font-bold">23/09/2026</span>
               </div>
             </div>
           </div>
@@ -225,13 +225,13 @@ export const Screen10Passbook: React.FC = () => {
                     {/* Deposit (Credit in Green) */}
                     <td className="py-2 px-2 text-right font-extrabold text-emerald-700 whitespace-nowrap text-[11px]">
                       {tx.deposit !== null ? (
-                        <span>+{Math.round(tx.deposit)}</span>
+                        <span>+{tx.deposit.toLocaleString('en-IN')}</span>
                       ) : '-'}
                     </td>
 
                     {/* Balance */}
                     <td className="py-2 pl-2 pr-4 text-right font-extrabold text-black whitespace-nowrap text-[11px]">
-                      <span>{Math.round(tx.balance)}</span>
+                      <span>{tx.balance.toLocaleString('en-IN')}</span>
                     </td>
                   </tr>
                 ))}

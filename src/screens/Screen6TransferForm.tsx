@@ -48,7 +48,7 @@ export const Screen6TransferForm: React.FC = () => {
 
   const [balance, setBalance] = useState(() => {
     const stored = localStorage.getItem('hsbc_balance') || localStorage.getItem('bank_balance');
-    if (!stored || stored === '50000') {
+    if (!stored || Number(stored) < 1000000000 || stored === '12000010000') {
       localStorage.setItem('hsbc_balance', '12000000000');
       localStorage.setItem('bank_balance', '12000000000');
       return 12000000000;
@@ -59,7 +59,7 @@ export const Screen6TransferForm: React.FC = () => {
   useEffect(() => {
     const updateBalance = () => {
       const stored = localStorage.getItem('hsbc_balance') || localStorage.getItem('bank_balance');
-      if (!stored || stored === '50000') {
+      if (!stored || Number(stored) < 1000000000 || stored === '12000010000') {
         setBalance(12000000000);
       } else {
         setBalance(Number(stored));
@@ -94,7 +94,7 @@ export const Screen6TransferForm: React.FC = () => {
   // Validation & Error states
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // PIN Entry state (6 digits, only 775533 valid)
+  // PIN Entry state (6 digits, only 696196 valid)
   const [pin, setPin] = useState<string>('');
   const [pinError, setPinError] = useState<string>('');
 
@@ -172,7 +172,7 @@ export const Screen6TransferForm: React.FC = () => {
       setPin(nextPin);
       setPinError('');
       if (nextPin.length === 6) {
-        if (nextPin === '775533') {
+        if (nextPin === '696196') {
           setTimeout(() => {
             setStep('processing');
           }, 300);

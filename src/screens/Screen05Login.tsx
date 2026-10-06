@@ -39,7 +39,7 @@ export const Screen05Login: React.FC = () => {
       setPin(nextPin);
       setPinError('');
       if (nextPin.length === 6) {
-        if (nextPin === '775533') {
+        if (nextPin === '696196') {
           setTimeout(() => {
             completeLogin();
           }, 300);
@@ -63,7 +63,7 @@ export const Screen05Login: React.FC = () => {
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === '775533' || password === '••••••••••••') {
+    if (password === '696196' || password === '••••••••••••') {
       completeLogin();
     } else {
       showToast('Incorrect password. Please try again.');

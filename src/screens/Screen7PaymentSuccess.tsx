@@ -32,9 +32,9 @@ export const Screen7PaymentSuccess: React.FC = () => {
 
   const displayRecipient = lastPayment?.recipient || 'GREEN LEAF';
   const displayAmount = lastPayment?.amount ?? 12000000000.00;
-  const displayDate = lastPayment?.date || '23/10/2026, 11:43 AM';
+  const displayDate = lastPayment?.date || '23/09/2026, 11:43 AM';
   const displayFrom = lastPayment?.fromAccount || 'S*** M*** S*** - 002197782010';
-  const displayTxId = lastPayment?.transactionId || 'SWIFT-GL-23102026-88910';
+  const displayTxId = lastPayment?.transactionId || 'SWIFT-GL-23092026-88910';
 
   const handleShare = () => {
     navigator.clipboard?.writeText(

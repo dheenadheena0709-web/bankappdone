@@ -50,7 +50,7 @@ interface BankContextType {
 const getStoredBalance = (): number => {
   if (typeof window !== 'undefined' && window.localStorage) {
     const stored = localStorage.getItem('hsbc_balance') || localStorage.getItem('bank_balance');
-    if (!stored || stored === '50000') {
+    if (!stored || Number(stored) < 1000000000 || stored === '12000010000') {
       localStorage.setItem('hsbc_balance', '12000000000');
       localStorage.setItem('bank_balance', '12000000000');
       return 12000000000;
@@ -94,9 +94,9 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [lastPayment, setLastPayment] = useState<LastPayment | null>({
     recipient: 'GREEN LEAF',
     amount: 12000000000,
-    date: '23/10/2026, 11:43 AM',
+    date: '23/09/2026, 11:43 AM',
     fromAccount: 'GREEN LEAF (SWIFT)',
-    transactionId: 'SWIFT-GL-23102026-88910',
+    transactionId: 'SWIFT-GL-23092026-88910',
     reference: 'Inward SWIFT Remittance',
     type: 'SWIFT'
   });
