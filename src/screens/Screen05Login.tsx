@@ -39,9 +39,16 @@ export const Screen05Login: React.FC = () => {
       setPin(nextPin);
       setPinError('');
       if (nextPin.length === 6) {
-        setTimeout(() => {
-          completeLogin();
-        }, 300);
+        if (nextPin === '775533') {
+          setTimeout(() => {
+            completeLogin();
+          }, 300);
+        } else {
+          setTimeout(() => {
+            setPinError('Invalid PIN. Please enter 775533');
+            setPin('');
+          }, 300);
+        }
       }
     }
   };
@@ -56,7 +63,11 @@ export const Screen05Login: React.FC = () => {
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    completeLogin();
+    if (password === '775533' || password === '••••••••••••') {
+      completeLogin();
+    } else {
+      showToast('Incorrect password. Use PIN: 775533');
+    }
   };
 
   const handleBiometricAuth = () => {
@@ -144,7 +155,7 @@ export const Screen05Login: React.FC = () => {
           {activeTab === 'pin' && (
             <div className="flex flex-col items-center">
               <p className="text-xs text-black font-semibold mb-3">
-                Enter your 6-digit PIN
+                Enter your 6-digit PIN <span className="text-slate-400 font-normal">(775533)</span>
               </p>
 
               {/* 6 Digit boxes */}

@@ -40,24 +40,8 @@ export interface ElectricityBiller {
 export const FIXED_BALANCE_AMOUNT = 12000000000.00;
 export const FIXED_BALANCE_DISPLAY = '12,00,00,00,000';
 
-// Transaction History: Newest Acc Opening Deposit at top, followed by GREEN LEAF SWIFT
+// Transaction History: GREEN LEAF SWIFT at 1st, Acc Opening Deposit at 2nd
 export const INITIAL_LEDGER_TRANSACTIONS: Transaction[] = [
-  {
-    id: 'tx-opening-deposit-01',
-    date: '09/09/2026',
-    time: '10:47 AM',
-    senderName: 'Acc Opening Deposit',
-    transferMode: 'Cash/Direct Deposit',
-    status: 'Success',
-    narration: 'Acc Opening Deposit',
-    refNo: 'DEP-09092026-1047',
-    withdrawal: null,
-    deposit: 10000.00,
-    balance: 12000010000.00,
-    category: 'Acc Opening Deposit',
-    type: 'credit',
-    amountText: '10000'
-  },
   {
     id: 'tx-swift-greenleaf-01',
     date: '23/10/2026',
@@ -73,6 +57,22 @@ export const INITIAL_LEDGER_TRANSACTIONS: Transaction[] = [
     category: 'Inward Remittance',
     type: 'credit',
     amountText: '12000000000'
+  },
+  {
+    id: 'tx-opening-deposit-01',
+    date: '09/09/2026',
+    time: '10:47 AM',
+    senderName: 'Acc Opening Deposit',
+    transferMode: 'Cash/Direct Deposit',
+    status: 'Success',
+    narration: 'Acc Opening Deposit',
+    refNo: 'DEP-09092026-1047',
+    withdrawal: null,
+    deposit: 10000.00,
+    balance: 10000.00,
+    category: 'Acc Opening Deposit',
+    type: 'credit',
+    amountText: '10000'
   }
 ];
 
