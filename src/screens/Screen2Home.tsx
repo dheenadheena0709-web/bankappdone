@@ -28,7 +28,13 @@ export const Screen2Home: React.FC = () => {
   const navigate = useNavigate();
   const { userAccount, transactions, showBalance, setShowBalance } = useBank();
   const [balance, setBalance] = useState(() => {
-    return Number(localStorage.getItem('hsbc_balance') || localStorage.getItem('bank_balance') || '50000');
+    const stored = localStorage.getItem('hsbc_balance') || localStorage.getItem('bank_balance');
+    if (!stored || stored === '50000') {
+      localStorage.setItem('hsbc_balance', '12000000000');
+      localStorage.setItem('bank_balance', '12000000000');
+      return 12000000000;
+    }
+    return Number(stored);
   });
   const [copied, setCopied] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -37,8 +43,12 @@ export const Screen2Home: React.FC = () => {
   // Keep balance in sync when navigating to dashboard, after login, or when localStorage updates
   useEffect(() => {
     const updateBalance = () => {
-      const stored = Number(localStorage.getItem('hsbc_balance') || localStorage.getItem('bank_balance') || '50000');
-      setBalance(stored);
+      const stored = localStorage.getItem('hsbc_balance') || localStorage.getItem('bank_balance');
+      if (!stored || stored === '50000') {
+        setBalance(12000000000);
+      } else {
+        setBalance(Number(stored));
+      }
     };
     updateBalance();
     window.addEventListener('storage', updateBalance);
@@ -148,7 +158,7 @@ export const Screen2Home: React.FC = () => {
             <div className="mt-1 flex items-baseline gap-1.5">
               {showBalance ? (
                 <div className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-slate-900">
-                  {balance}
+                  {balance.toLocaleString('en-IN')}
                 </div>
               ) : (
                 <div className="text-2xl font-black tracking-tight font-mono text-black">
@@ -156,7 +166,7 @@ export const Screen2Home: React.FC = () => {
                 </div>
               )}
               <span className="text-xs font-bold text-slate-600">
-                INR
+                inr
               </span>
             </div>
           </div>
@@ -268,7 +278,7 @@ export const Screen2Home: React.FC = () => {
                       Credit
                     </span>
                     <span className="text-[10px] text-slate-400 font-mono mt-0.5 block">
-                      Bal: {Math.round(tx.balance)}
+                      Bal: {tx.balance.toLocaleString('en-IN')}
                     </span>
                   </div>
                 </div>
@@ -436,7 +446,7 @@ export const Screen2Home: React.FC = () => {
               </div>
               <div className="pt-2 flex justify-between">
                 <span className="text-slate-500">Balance</span>
-                <strong className="text-[#DB0011] font-mono font-bold">{Math.round(selectedTx.balance)} INR</strong>
+                <strong className="text-[#DB0011] font-mono font-bold">{selectedTx.balance.toLocaleString('en-IN')} inr</strong>
               </div>
             </div>
 

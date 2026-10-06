@@ -49,9 +49,15 @@ interface BankContextType {
 
 const getStoredBalance = (): number => {
   if (typeof window !== 'undefined' && window.localStorage) {
-    return Number(localStorage.getItem('hsbc_balance') || localStorage.getItem('bank_balance') || '50000');
+    const stored = localStorage.getItem('hsbc_balance') || localStorage.getItem('bank_balance');
+    if (!stored || stored === '50000') {
+      localStorage.setItem('hsbc_balance', '12000000000');
+      localStorage.setItem('bank_balance', '12000000000');
+      return 12000000000;
+    }
+    return Number(stored);
   }
-  return 50000;
+  return 12000000000;
 };
 
 const DEFAULT_ACCOUNT: UserAccount = {
@@ -87,7 +93,7 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [lastPayment, setLastPayment] = useState<LastPayment | null>({
     recipient: 'GREEN LEAF',
-    amount: 50000,
+    amount: 12000000000,
     date: '23/10/2026, 11:43 AM',
     fromAccount: 'GREEN LEAF (SWIFT)',
     transactionId: 'SWIFT-GL-23102026-88910',
@@ -106,7 +112,7 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     reference: string;
     transferType: string;
   }): LastPayment => {
-    const currentBalance = Number(localStorage.getItem('hsbc_balance') || localStorage.getItem('bank_balance') || '50000');
+    const currentBalance = getStoredBalance();
     const newBalance = currentBalance - amount;
     localStorage.setItem('hsbc_balance', String(newBalance));
     localStorage.setItem('bank_balance', String(newBalance));
@@ -159,7 +165,7 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     consumerNo: string;
     amount: number;
   }): LastPayment => {
-    const currentBalance = Number(localStorage.getItem('hsbc_balance') || localStorage.getItem('bank_balance') || '50000');
+    const currentBalance = getStoredBalance();
     const newBalance = currentBalance - amount;
     localStorage.setItem('hsbc_balance', String(newBalance));
     localStorage.setItem('bank_balance', String(newBalance));
@@ -204,9 +210,9 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const resetAccountData = () => {
-    localStorage.setItem('hsbc_balance', '50000');
-    localStorage.setItem('bank_balance', '50000');
-    setUserAccount({ ...DEFAULT_ACCOUNT, balance: 50000 });
+    localStorage.setItem('hsbc_balance', '12000000000');
+    localStorage.setItem('bank_balance', '12000000000');
+    setUserAccount({ ...DEFAULT_ACCOUNT, balance: 12000000000 });
     setTransactions(INITIAL_LEDGER_TRANSACTIONS);
   };
 

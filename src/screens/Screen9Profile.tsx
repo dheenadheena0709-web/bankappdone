@@ -302,7 +302,7 @@ export const Screen9Profile: React.FC = () => {
                   </div>
                   <div className="flex justify-between py-1 border-b border-slate-100">
                     <span>Account Balance</span>
-                    <strong className="text-[#DB0011] font-mono font-bold">{Math.round(userAccount.balance)}</strong>
+                    <strong className="text-[#DB0011] font-mono font-bold">{userAccount.balance.toLocaleString('en-IN')} inr</strong>
                   </div>
                   <div className="flex justify-between py-1 border-b border-slate-100">
                     <span>Tax Residency</span>

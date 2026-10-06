@@ -47,13 +47,23 @@ export const Screen6TransferForm: React.FC = () => {
   const { userAccount, executeTransfer, showBalance, setShowBalance } = useBank();
 
   const [balance, setBalance] = useState(() => {
-    return Number(localStorage.getItem('hsbc_balance') || localStorage.getItem('bank_balance') || '50000');
+    const stored = localStorage.getItem('hsbc_balance') || localStorage.getItem('bank_balance');
+    if (!stored || stored === '50000') {
+      localStorage.setItem('hsbc_balance', '12000000000');
+      localStorage.setItem('bank_balance', '12000000000');
+      return 12000000000;
+    }
+    return Number(stored);
   });
 
   useEffect(() => {
     const updateBalance = () => {
-      const stored = Number(localStorage.getItem('hsbc_balance') || localStorage.getItem('bank_balance') || '50000');
-      setBalance(stored);
+      const stored = localStorage.getItem('hsbc_balance') || localStorage.getItem('bank_balance');
+      if (!stored || stored === '50000') {
+        setBalance(12000000000);
+      } else {
+        setBalance(Number(stored));
+      }
     };
     updateBalance();
     window.addEventListener('storage', updateBalance);
@@ -135,8 +145,8 @@ export const Screen6TransferForm: React.FC = () => {
     const numAmt = parseFloat(amount) || 0;
     if (numAmt <= 0) {
       newErrors.amount = 'Please enter a valid amount';
-    } else if (numAmt > userAccount.balance) {
-      newErrors.amount = `Insufficient balance. Available: ₹${userAccount.balance.toLocaleString('en-IN')}`;
+    } else if (numAmt > balance) {
+      newErrors.amount = `Insufficient balance. Available: ${balance.toLocaleString('en-IN')} inr`;
     }
 
     setErrors(newErrors);
@@ -277,10 +287,10 @@ export const Screen6TransferForm: React.FC = () => {
             <div className="flex items-baseline gap-1 mt-0.5">
               <span className="text-xl font-black font-mono tracking-tight text-white">
                 {showBalance
-                  ? `₹${balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
+                  ? balance.toLocaleString('en-IN')
                   : '••••••••••'}
               </span>
-              <span className="text-xs font-bold text-white/80">INR</span>
+              <span className="text-xs font-bold text-white/80">inr</span>
             </div>
           </div>
           <button

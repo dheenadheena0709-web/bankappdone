@@ -246,7 +246,7 @@ export const Screen10Passbook: React.FC = () => {
                 <span>Computer Generated Ledger · Official Bank Verification</span>
               </div>
               <div className="text-right">
-                <span className="block font-mono font-bold text-slate-900 text-xs">Closing Balance: {Math.round(userAccount.balance)} INR</span>
+                <span className="block font-mono font-bold text-slate-900 text-xs">Closing Balance: {userAccount.balance.toLocaleString('en-IN')} inr</span>
                 <span>Page 01 of 01 · End of Entries</span>
               </div>
             </div>

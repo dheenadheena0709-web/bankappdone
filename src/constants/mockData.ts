@@ -36,9 +36,9 @@ export interface ElectricityBiller {
   dueDate?: string;
 }
 
-// Fixed balance: 12000010000 (old 12000000000 + 10000 Acc Opening Deposit)
-export const FIXED_BALANCE_AMOUNT = 12000010000.00;
-export const FIXED_BALANCE_DISPLAY = '12000010000';
+// Balance: 12,00,00,00,000 INR
+export const FIXED_BALANCE_AMOUNT = 12000000000.00;
+export const FIXED_BALANCE_DISPLAY = '12,00,00,00,000';
 
 // Transaction History: Newest Acc Opening Deposit at top, followed by GREEN LEAF SWIFT
 export const INITIAL_LEDGER_TRANSACTIONS: Transaction[] = [
