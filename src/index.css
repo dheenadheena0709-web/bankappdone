@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Authentic Passbook ruled paper background */
+.ledger-paper-lines {
+  background-color: #fbfcfe;
+  background-image: linear-gradient(rgba(186, 215, 248, 0.45) 1px, transparent 1px);
+  background-size: 100% 32px;
+}
+
+.ledger-margin-line {
+  border-left: 2px double rgba(220, 38, 38, 0.35);
+}
+
+.font-ledger {
+  font-family: 'Courier Prime', 'IBM Plex Mono', monospace;
+}
+
+.font-data {
+  font-family: 'IBM Plex Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom scrollbars inside the mobile frame */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

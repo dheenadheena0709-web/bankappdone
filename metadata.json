@@ -1,0 +1,6 @@
+{
+  "name": "Dheena Bank Mobile",
+  "description": "Educational prototype of Dheena Bank mobile banking app with authentic physical mPassbook ledger, biometric login, transfers, bill payments, and investments.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

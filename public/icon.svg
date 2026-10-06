@@ -1,0 +1,20 @@
+
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" fill="#FFFFFF" />
+  <g transform="translate(256, 256) scale(0.95) translate(-256, -256)">
+    <!-- Top red triangle -->
+    <polygon points="176,140 336,140 256,220" fill="#DB0011" />
+    
+    <!-- Bottom red triangle -->
+    <polygon points="176,300 336,300 256,220" fill="#DB0011" />
+    
+    <!-- Left outer red triangle -->
+    <polygon points="96,220 176,140 176,300" fill="#DB0011" />
+    
+    <!-- Right outer red triangle -->
+    <polygon points="416,220 336,140 336,300" fill="#DB0011" />
+    
+    <!-- Text "IN" below the hexagon -->
+    <text x="256" y="392" text-anchor="middle" font-family="Plus Jakarta Sans, Arial, Helvetica, sans-serif" font-size="70" font-weight="800" fill="#1A1A1A" letter-spacing="1.5">IN</text>
+  </g>
+</svg>
