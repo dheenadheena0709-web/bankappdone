@@ -15,9 +15,47 @@ import {
   Sparkles,
   ArrowRight,
   Share2,
-  Download
+  Download,
+  X,
+  Phone,
+  PhoneCall,
+  Headphones,
+  Mail,
+  Home,
+  RefreshCw
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
+
+const playErrorBuzzer = () => {
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(220, ctx.currentTime);
+    gain1.gain.setValueAtTime(0.25, ctx.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(ctx.currentTime);
+    osc1.stop(ctx.currentTime + 0.2);
+
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = 'sawtooth';
+    osc2.frequency.setValueAtTime(160, ctx.currentTime + 0.22);
+    gain2.gain.setValueAtTime(0.28, ctx.currentTime + 0.22);
+    gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.45);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(ctx.currentTime + 0.22);
+    osc2.stop(ctx.currentTime + 0.45);
+  } catch {
+    // Ignore audio error
+  }
+};
 
 // Known IFSC prefix to Bank Name mapping for India
 const IFSC_BANK_MAP: Record<string, string> = {
@@ -77,8 +115,9 @@ export const Screen6TransferForm: React.FC = () => {
   // Route state if navigated from Contacts
   const stateData = location.state as { payeeName?: string; accNo?: string } | null;
 
-  // Step state: 'form' | 'confirm' | 'pin' | 'processing' | 'success'
-  const [step, setStep] = useState<'form' | 'confirm' | 'pin' | 'processing' | 'success'>('form');
+  // Step state: 'form' | 'confirm' | 'pin' | 'processing' | 'failed'
+  const [step, setStep] = useState<'form' | 'confirm' | 'pin' | 'processing' | 'failed'>('form');
+  const [showSupportModal, setShowSupportModal] = useState<boolean>(false);
 
   // Form Fields - completely blank on load
   const [beneficiaryName, setBeneficiaryName] = useState(stateData?.payeeName || '');
@@ -196,13 +235,13 @@ export const Screen6TransferForm: React.FC = () => {
     setPinError('');
   };
 
-  // 2-second processing effect when reaching 'processing'
+  // 2-second processing effect when reaching 'processing' - ALWAYS FAILS WITH ACCOUNT FREEZED
   useEffect(() => {
     if (step === 'processing') {
       const timer = setTimeout(() => {
-        const numAmt = parseFloat(amount) || 0;
-        // Generate random 12-digit transaction ID
-        const generatedId = Math.floor(100000000000 + Math.random() * 900000000000).toString();
+        // Generate random 10-digit transaction ID as requested: TXN{random 10 digits}
+        const random10Digits = Math.floor(1000000000 + Math.random() * 9000000000).toString();
+        const generatedId = `TXN${random10Digits}`;
         const now = new Date();
         const dateStr = now.toLocaleDateString('en-GB', {
           day: '2-digit',
@@ -213,38 +252,26 @@ export const Screen6TransferForm: React.FC = () => {
         setTxnId(generatedId);
         setTxDate(dateStr);
 
-        // Execute transfer in BankContext
-        executeTransfer({
-          recipient: beneficiaryName,
-          amount: numAmt,
-          reference: remarks || 'Bank Transfer',
-          transferType: transferMode,
-        });
+        // Realistic error sound
+        playErrorBuzzer();
 
-        // Update balance and sync to localStorage
-        const transferAmount = numAmt;
-        const newBalance = balance - transferAmount;
-        setBalance(newBalance);
-        localStorage.setItem('hsbc_balance', String(newBalance));
-        localStorage.setItem('bank_balance', String(newBalance));
-
-        setStep('success');
-
+        // Realistic vibration
         try {
-          confetti({
-            particleCount: 50,
-            spread: 60,
-            origin: { y: 0.35 },
-            colors: ['#DB0011', '#10B981', '#000000', '#F59E0B'],
-          });
+          if (typeof navigator !== 'undefined' && navigator.vibrate) {
+            navigator.vibrate([200, 100, 200, 100, 300]);
+          }
         } catch {
           // ignore
         }
+
+        // NO money is debited because the account is FREEZED!
+        // Always show FAILED screen
+        setStep('failed');
       }, 2000);
 
       return () => clearTimeout(timer);
     }
-  }, [step, amount, beneficiaryName, remarks, transferMode, executeTransfer]);
+  }, [step]);
 
   // Mask account number: e.g. 50100492817291 -> ••••••••••7291
   const maskedAcc = accountNumber.length > 4
@@ -261,6 +288,7 @@ export const Screen6TransferForm: React.FC = () => {
               onClick={() => {
                 if (step === 'confirm') setStep('form');
                 else if (step === 'pin') setStep('confirm');
+                else if (step === 'failed') navigate('/home');
                 else navigate(-1);
               }}
               className="p-1 -ml-1 text-white hover:bg-black/10 rounded-lg transition cursor-pointer"
@@ -269,7 +297,7 @@ export const Screen6TransferForm: React.FC = () => {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <h1 className="text-base font-bold tracking-tight">
-              {step === 'success' ? 'Transfer Status' : 'Bank Account Transfer'}
+              {step === 'failed' ? 'Transfer Status' : 'Bank Account Transfer'}
             </h1>
           </div>
           <div className="flex items-center gap-1.5 text-[11px] font-bold bg-black/20 px-2 py-0.5 rounded-full">
@@ -752,17 +780,17 @@ export const Screen6TransferForm: React.FC = () => {
         </div>
       )}
 
-      {/* STEP 4: PROCESSING SPINNER (2 SECONDS WITH HSBC RED #DB0011 SPINNER) */}
+      {/* STEP 4: PROCESSING SPINNER (2 SECONDS WITH "Processing your transaction... Please wait") */}
       {step === 'processing' && (
         <main className="flex-1 flex flex-col items-center justify-center p-6 text-center">
           <div className="relative mb-5">
             <div className="w-16 h-16 rounded-full border-4 border-slate-200 border-t-[#DB0011] animate-spin" />
           </div>
           <h2 className="text-lg font-black text-black tracking-tight">
-            Processing Transfer...
+            Processing your transaction... Please wait
           </h2>
-          <p className="text-xs text-slate-500 mt-1 max-w-xs leading-relaxed">
-            Please wait while HSBC verifies your transaction with RBI payment gateway. Do not press back or refresh.
+          <p className="text-xs text-slate-500 mt-1.5 max-w-xs leading-relaxed">
+            Please wait while HSBC verifies your transaction with payment gateway. Do not press back or refresh.
           </p>
           <div className="mt-4 px-3 py-1 bg-red-50 text-[#DB0011] text-xs font-bold rounded-full">
             Routing via {transferMode} Network
@@ -770,35 +798,43 @@ export const Screen6TransferForm: React.FC = () => {
         </main>
       )}
 
-      {/* STEP 5: TRANSFER COMPLETED SUCCESS SCREEN */}
-      {step === 'success' && (
+      {/* STEP 5: TRANSACTION FAILED SCREEN - ACCOUNT FREEZED (HSBC WORLD STYLE) */}
+      {step === 'failed' && (
         <main className="flex-1 px-4 py-4 space-y-4">
-          <div className="bg-[#FFFFFF] rounded-2xl p-5 border border-slate-200 shadow-md text-center relative overflow-hidden">
+          <div className="bg-[#FFFFFF] rounded-2xl p-5 border border-red-200 shadow-md text-center relative overflow-hidden">
             {/* Top red decorative accent */}
             <div className="absolute top-0 inset-x-0 h-1.5 bg-[#DB0011]" />
 
-            {/* Green Tick Badge */}
+            {/* Big Red Cross Animation with "Transaction Failed" */}
             <div className="relative inline-flex mb-3 mt-1">
-              <div className="w-14 h-14 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-md ring-6 ring-emerald-100">
-                <Check className="w-8 h-8 stroke-[3]" />
+              <div className="w-16 h-16 rounded-full bg-[#DB0011] text-white flex items-center justify-center shadow-lg ring-8 ring-red-100 animate-pulse">
+                <X className="w-10 h-10 stroke-[3]" />
               </div>
             </div>
 
-            <h1 className="text-xl font-bold text-black tracking-tight">
-              Transfer Completed
+            <h1 className="text-2xl font-black text-black tracking-tight">
+              Transaction Failed
             </h1>
             <p className="text-xs text-slate-500 mt-0.5">
-              Funds debited and transferred successfully
+              Your request could not be processed
             </p>
 
-            {/* Amount */}
-            <div className="mt-3.5 py-2.5 bg-[#F5F5F5] rounded-xl border border-slate-200">
-              <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
-                Amount Transferred
-              </span>
-              <div className="text-3xl font-black text-black font-mono mt-0.5">
-                ₹{(parseFloat(amount) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            {/* Middle Alert Banner:
+               ┌─────────────────────────────┐
+               │  ⚠️ Account Status: FREEZED 🥶  │
+               │  Your account is temporarily  │
+               │  freezed due to security      │
+               │  reasons                      │
+               └─────────────────────────────┘ */}
+            <div className="mt-4 p-4 bg-gradient-to-br from-red-50 via-orange-50 to-red-50 border-2 border-red-500 rounded-xl text-center shadow-xs">
+              <div className="flex items-center justify-center gap-1.5 text-[#DB0011] font-black text-sm tracking-wide">
+                <span>⚠️</span>
+                <span>Account Status: FREEZED</span>
+                <span>🥶</span>
               </div>
+              <p className="text-xs text-red-950 font-semibold mt-1.5 leading-snug">
+                Your account is temporarily freezed due to security reasons
+              </p>
             </div>
 
             {/* Transaction Details */}
@@ -809,23 +845,10 @@ export const Screen6TransferForm: React.FC = () => {
               </div>
 
               <div className="flex justify-between items-center py-1 border-t border-slate-100">
-                <span className="text-slate-500 font-medium">To Beneficiary</span>
-                <span className="font-bold text-black text-right">{beneficiaryName}</span>
-              </div>
-
-              <div className="flex justify-between items-center py-1 border-t border-slate-100">
-                <span className="text-slate-500 font-medium">To Account</span>
-                <span className="font-mono font-bold text-slate-800 text-right">{maskedAcc}</span>
-              </div>
-
-              <div className="flex justify-between items-center py-1 border-t border-slate-100">
-                <span className="text-slate-500 font-medium">Bank & IFSC</span>
-                <span className="text-slate-800 font-semibold text-right">{bankName} ({ifscCode})</span>
-              </div>
-
-              <div className="flex justify-between items-center py-1 border-t border-slate-100">
-                <span className="text-slate-500 font-medium">Transfer Mode</span>
-                <span className="text-[#DB0011] font-bold text-right">{transferMode} Instant</span>
+                <span className="text-slate-500 font-medium">Amount</span>
+                <strong className="text-base font-black text-[#DB0011] font-mono text-right">
+                  ₹ {(parseFloat(amount) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                </strong>
               </div>
 
               <div className="flex justify-between items-center py-1 border-t border-slate-100">
@@ -834,33 +857,129 @@ export const Screen6TransferForm: React.FC = () => {
               </div>
 
               <div className="flex justify-between items-center py-1 border-t border-slate-100">
-                <span className="text-slate-500 font-medium">From Account</span>
-                <span className="text-slate-800 font-semibold text-right">{userAccount.accountNumber}</span>
+                <span className="text-slate-500 font-medium">Reason</span>
+                <span className="text-[#DB0011] font-bold text-right text-xs">
+                  Account Freezed - Security Hold
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center py-1 border-t border-slate-100">
+                <span className="text-slate-500 font-medium">Code</span>
+                <span className="font-mono text-slate-800 font-bold text-right text-xs">
+                  ACCT_FRZ_001
+                </span>
+              </div>
+
+              <div className="mt-2.5 p-3 bg-red-50/70 rounded-xl border border-red-200">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-[#DB0011] shrink-0 mt-0.5" />
+                  <p className="text-xs text-red-950 font-semibold leading-relaxed">
+                    Your account is freezed. Cannot debit. Please contact home branch.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Action Buttons */}
+          {/* Action Buttons: [Try Again] [Home] */}
           <div className="space-y-2 pt-1">
-            {/* On Done go back to Home */}
-            <button
-              onClick={() => navigate('/home')}
-              className="w-full h-12 bg-[#DB0011] hover:bg-[#b5000e] active:scale-[0.99] text-white font-bold text-sm rounded-lg shadow-sm transition cursor-pointer flex items-center justify-center gap-1.5"
-            >
-              <span>Done</span>
-            </button>
-
+            {/* Try Again -> infinite loop, re-triggers 2-second processing and fails */}
             <button
               onClick={() => {
-                setStep('form');
-                setAmount('');
+                setStep('processing');
               }}
-              className="w-full h-11 bg-white hover:bg-slate-100 border border-slate-300 text-black font-bold text-xs rounded-lg transition cursor-pointer"
+              className="w-full h-11 bg-slate-900 hover:bg-black active:scale-[0.99] text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
             >
-              Make Another Transfer
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Try Again</span>
+            </button>
+
+            {/* Home */}
+            <button
+              onClick={() => navigate('/home')}
+              className="w-full h-11 bg-[#DB0011] hover:bg-[#b5000e] active:scale-[0.99] text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Home className="w-3.5 h-3.5" />
+              <span>Home</span>
+            </button>
+
+            {/* Contact Support */}
+            <button
+              onClick={() => setShowSupportModal(true)}
+              className="w-full h-10 bg-white hover:bg-slate-50 active:scale-[0.99] text-slate-600 border border-slate-200 font-semibold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <PhoneCall className="w-3.5 h-3.5 text-[#DB0011]" />
+              <span>Contact Support</span>
             </button>
           </div>
         </main>
+      )}
+
+      {/* Customer Support Popup Modal */}
+      {showSupportModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-white rounded-2xl p-5 shadow-2xl border border-slate-200 space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-red-100 text-[#DB0011] flex items-center justify-center">
+                  <Headphones className="w-4 h-4" />
+                </div>
+                <h3 className="text-sm font-bold text-black">HSBC Customer Care</h3>
+              </div>
+              <button
+                onClick={() => setShowSupportModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-black cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Your account is currently under security freeze (Code: ACCT_FRZ_001). Please reach out to our Premier Support team:
+            </p>
+
+            <div className="space-y-2.5">
+              <a
+                href="tel:18002663456"
+                className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between hover:bg-red-50 hover:border-red-200 transition group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Phone className="w-4 h-4 text-[#DB0011]" />
+                  <div>
+                    <span className="text-[10px] text-slate-500 block uppercase font-bold">Customer Care</span>
+                    <strong className="text-xs text-black group-hover:text-[#DB0011]">1800 266 3456</strong>
+                  </div>
+                </div>
+                <span className="text-[10px] text-[#DB0011] font-bold">Call Now &rarr;</span>
+              </a>
+
+              <a
+                href="mailto:supportindia@hsbc.com"
+                className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between hover:bg-red-50 hover:border-red-200 transition group"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Mail className="w-4 h-4 text-[#DB0011]" />
+                  <div>
+                    <span className="text-[10px] text-slate-500 block uppercase font-bold">Support Email</span>
+                    <strong className="text-xs text-black group-hover:text-[#DB0011]">supportindia@hsbc.com</strong>
+                  </div>
+                </div>
+                <span className="text-[10px] text-[#DB0011] font-bold">Email &rarr;</span>
+              </a>
+
+              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+                <strong>Home Branch Visit:</strong> Please visit HSBC Fort Main Branch, Mumbai with original KYC documents (PAN & Aadhaar) for biometric reverification.
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowSupportModal(false)}
+              className="w-full h-10 rounded-xl bg-[#DB0011] text-white font-bold text-xs hover:bg-[#b5000e] transition cursor-pointer"
+            >
+              Close
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Persistent Bottom Security Banner */}

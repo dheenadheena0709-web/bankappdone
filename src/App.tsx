@@ -16,6 +16,7 @@ import { Screen7PaymentSuccess } from './screens/Screen7PaymentSuccess';
 import { Screen8Investment } from './screens/Screen8Investment';
 import { Screen9Profile } from './screens/Screen9Profile';
 import { Screen10Passbook } from './screens/Screen10Passbook';
+import { ScreenQRScanner } from './screens/ScreenQRScanner';
 
 export default function App() {
   return (
@@ -50,8 +51,9 @@ export default function App() {
             {/* Screen 6 - Transfer Form */}
             <Route path="/transfer" element={<Screen6TransferForm />} />
 
-            {/* Screen 7 - Payment Completed */}
+            {/* Screen 7 - Payment Failed / Status */}
             <Route path="/payment-success" element={<Screen7PaymentSuccess />} />
+            <Route path="/payment-failed" element={<Screen7PaymentSuccess />} />
 
             {/* Screen 8 - Investment */}
             <Route path="/investment" element={<Screen8Investment />} />
@@ -61,6 +63,9 @@ export default function App() {
 
             {/* Screen 10 - mPASSBOOK - REAL PHYSICAL LEDGER */}
             <Route path="/mpassbook" element={<Screen10Passbook />} />
+
+            {/* QR Scanner Screen */}
+            <Route path="/scan-qr" element={<ScreenQRScanner />} />
 
             {/* Fallback to Home */}
             <Route path="*" element={<Navigate to="/" replace />} />

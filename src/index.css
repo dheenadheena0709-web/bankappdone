@@ -35,3 +35,38 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* QR Code Scanner Animation (Google Pay style) */
+@keyframes qrScan {
+  0% {
+    top: 6%;
+    opacity: 0.9;
+  }
+  50% {
+    top: 92%;
+    opacity: 1;
+  }
+  100% {
+    top: 6%;
+    opacity: 0.9;
+  }
+}
+
+.animate-qr-scan {
+  animation: qrScan 2.2s ease-in-out infinite;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

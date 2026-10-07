@@ -21,7 +21,9 @@ import {
   CheckCircle2,
   X,
   Printer,
-  Download
+  Download,
+  Lock,
+  AlertCircle
 } from 'lucide-react';
 
 export const Screen2Home: React.FC = () => {
@@ -204,7 +206,7 @@ export const Screen2Home: React.FC = () => {
             </button>
 
             <button
-              onClick={() => showToast('QR scanner active')}
+              onClick={() => navigate('/scan-qr')}
               className="flex flex-col items-center gap-1 group cursor-pointer"
             >
               <div className="w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-[#DB0011] group-hover:text-white flex items-center justify-center text-slate-700 transition">

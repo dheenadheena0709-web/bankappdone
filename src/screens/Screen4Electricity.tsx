@@ -16,21 +16,23 @@ export const Screen4Electricity: React.FC = () => {
   );
 
   const handlePayLinkedBill = () => {
-    executeBillPayment({
-      billerName: LINKED_ELECTRICITY_ACCOUNT.billerName,
-      consumerNo: LINKED_ELECTRICITY_ACCOUNT.consumerNo,
-      amount: LINKED_ELECTRICITY_ACCOUNT.amount,
+    navigate('/transfer', {
+      state: {
+        payeeName: LINKED_ELECTRICITY_ACCOUNT.billerName,
+        accNo: LINKED_ELECTRICITY_ACCOUNT.consumerNo,
+        amount: String(LINKED_ELECTRICITY_ACCOUNT.amount),
+      },
     });
-    navigate('/payment-success');
   };
 
   const handleSelectBiller = (biller: typeof ELECTRICITY_BILLERS[0]) => {
-    executeBillPayment({
-      billerName: biller.name,
-      consumerNo: '902194821',
-      amount: 3250.00,
+    navigate('/transfer', {
+      state: {
+        payeeName: biller.name,
+        accNo: '9021948210',
+        amount: '3250',
+      },
     });
-    navigate('/payment-success');
   };
 
   return (
