@@ -19,7 +19,9 @@ const IGNORED_PATHS = [
   'hsbc-mobile-banking.zip',
   'public/dheena-bank-mobile.zip',
   'public/hsbc-mobile-banking.zip',
-  'package-lock.json'
+  'bun.lock',
+  'bun.lockb',
+  '.bun'
 ];
 
 function shouldInclude(relPath) {
