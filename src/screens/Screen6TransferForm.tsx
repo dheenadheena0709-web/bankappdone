@@ -22,8 +22,10 @@ import {
   Headphones,
   Mail,
   Home,
-  RefreshCw
+  RefreshCw,
+  Smartphone
 } from 'lucide-react';
+import { AccountFrozenModal } from '../components/AccountFrozenModal';
 
 const playErrorBuzzer = () => {
   try {
@@ -118,22 +120,36 @@ export const Screen6TransferForm: React.FC = () => {
   // Step state: 'form' | 'confirm' | 'pin' | 'processing' | 'failed'
   const [step, setStep] = useState<'form' | 'confirm' | 'pin' | 'processing' | 'failed'>('form');
   const [showSupportModal, setShowSupportModal] = useState<boolean>(false);
+  const [showFreezePopup, setShowFreezePopup] = useState<boolean>(false);
 
-  // Form Fields - completely blank on load
-  const [beneficiaryName, setBeneficiaryName] = useState(stateData?.payeeName || '');
-  const [accountNumber, setAccountNumber] = useState(stateData?.accNo?.replace(/\D/g, '') || '');
-  const [confirmAccountNumber, setConfirmAccountNumber] = useState(stateData?.accNo?.replace(/\D/g, '') || '');
+  // Tab state: 'account' (Account Transfer) vs 'upi' (Mobile Number / UPI Transfer)
+  const isUpiInState = Boolean(
+    stateData?.accNo?.includes('@') ||
+    (stateData?.accNo && !/^\d{9,18}$/.test(stateData.accNo))
+  );
+  const [transferTab, setTransferTab] = useState<'account' | 'upi'>(isUpiInState ? 'upi' : 'account');
+
+  // Account Transfer Fields - completely blank on load
+  const [beneficiaryName, setBeneficiaryName] = useState(!isUpiInState ? (stateData?.payeeName || '') : '');
+  const [accountNumber, setAccountNumber] = useState(!isUpiInState ? (stateData?.accNo?.replace(/\D/g, '') || '') : '');
+  const [confirmAccountNumber, setConfirmAccountNumber] = useState(!isUpiInState ? (stateData?.accNo?.replace(/\D/g, '') || '') : '');
   const [ifscCode, setIfscCode] = useState('');
   const [bankName, setBankName] = useState('');
   const [accountType, setAccountType] = useState<'Savings' | 'Current'>('Savings');
   const [transferMode, setTransferMode] = useState<'IMPS' | 'NEFT'>('IMPS');
-  const [amount, setAmount] = useState<string>('');
+
+  // UPI / Mobile Transfer Fields - completely blank on load
+  const [upiIdentifier, setUpiIdentifier] = useState(isUpiInState ? (stateData?.accNo || '') : '');
+  const [upiPayeeName, setUpiPayeeName] = useState(isUpiInState ? (stateData?.payeeName || '') : '');
+
+  // Common Fields
+  const [amount, setAmount] = useState<string>((location.state as any)?.amount || '');
   const [remarks, setRemarks] = useState<string>('');
 
   // Validation & Error states
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // PIN Entry state (6 digits, only 696196 valid)
+  // PIN Entry state (6 digits)
   const [pin, setPin] = useState<string>('');
   const [pinError, setPinError] = useState<string>('');
 
@@ -159,26 +175,33 @@ export const Screen6TransferForm: React.FC = () => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!beneficiaryName.trim()) {
-      newErrors.beneficiaryName = 'Beneficiary name is required';
-    }
+    if (transferTab === 'account') {
+      if (!beneficiaryName.trim()) {
+        newErrors.beneficiaryName = 'Beneficiary name is required';
+      }
 
-    if (!accountNumber.trim()) {
-      newErrors.accountNumber = 'Account number is required';
-    } else if (accountNumber.length < 9 || accountNumber.length > 18) {
-      newErrors.accountNumber = 'Account number should be 9 to 18 digits';
-    }
+      if (!accountNumber.trim()) {
+        newErrors.accountNumber = 'Account number is required';
+      } else if (accountNumber.length < 9 || accountNumber.length > 18) {
+        newErrors.accountNumber = 'Account number should be 9 to 18 digits';
+      }
 
-    if (accountNumber !== confirmAccountNumber) {
-      newErrors.confirmAccountNumber = 'Account numbers do not match';
-    }
+      if (accountNumber !== confirmAccountNumber) {
+        newErrors.confirmAccountNumber = 'Account numbers do not match';
+      }
 
-    // Standard IFSC format: 4 letters, 0, 6 characters (alphanumeric)
-    const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
-    if (!ifscCode.trim()) {
-      newErrors.ifscCode = 'IFSC code is required';
-    } else if (!ifscRegex.test(ifscCode.toUpperCase().trim())) {
-      newErrors.ifscCode = 'Invalid IFSC format (e.g. SBIN0001234)';
+      // Standard IFSC format: 4 letters, 0, 6 characters (alphanumeric)
+      const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+      if (!ifscCode.trim()) {
+        newErrors.ifscCode = 'IFSC code is required';
+      } else if (!ifscRegex.test(ifscCode.toUpperCase().trim())) {
+        newErrors.ifscCode = 'Invalid IFSC format (e.g. SBIN0001234)';
+      }
+    } else {
+      // UPI / Mobile Transfer validation
+      if (!upiIdentifier.trim()) {
+        newErrors.upiIdentifier = 'Please enter Mobile Number or UPI ID';
+      }
     }
 
     const numAmt = parseFloat(amount) || 0;
@@ -211,16 +234,9 @@ export const Screen6TransferForm: React.FC = () => {
       setPin(nextPin);
       setPinError('');
       if (nextPin.length === 6) {
-        if (nextPin === '696196') {
-          setTimeout(() => {
-            setStep('processing');
-          }, 300);
-        } else {
-          setTimeout(() => {
-            setPinError('Invalid PIN');
-            setPin('');
-          }, 250);
-        }
+        setTimeout(() => {
+          setStep('processing');
+        }, 200);
       }
     }
   };
@@ -265,8 +281,9 @@ export const Screen6TransferForm: React.FC = () => {
         }
 
         // NO money is debited because the account is FREEZED!
-        // Always show FAILED screen
+        // Always show FAILED screen & Freeze popup
         setStep('failed');
+        setShowFreezePopup(true);
       }, 2000);
 
       return () => clearTimeout(timer);
@@ -334,204 +351,287 @@ export const Screen6TransferForm: React.FC = () => {
       {/* STEP 1: FORM VIEW */}
       {step === 'form' && (
         <main className="flex-1 px-4 py-3 space-y-3 overflow-y-auto">
+          {/* Two Top Tabs: Account Transfer vs Mobile Number / UPI Transfer */}
+          <div className="grid grid-cols-2 gap-2 p-1 bg-slate-200/80 rounded-xl">
+            <button
+              type="button"
+              onClick={() => {
+                setTransferTab('account');
+                setErrors({});
+              }}
+              className={`py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                transferTab === 'account'
+                  ? 'bg-[#DB0011] text-white shadow-xs'
+                  : 'text-slate-700 hover:text-black hover:bg-slate-200'
+              }`}
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              <span>Account Transfer</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setTransferTab('upi');
+                setErrors({});
+              }}
+              className={`py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                transferTab === 'upi'
+                  ? 'bg-[#DB0011] text-white shadow-xs'
+                  : 'text-slate-700 hover:text-black hover:bg-slate-200'
+              }`}
+            >
+              <Smartphone className="w-3.5 h-3.5" />
+              <span>Mobile / UPI</span>
+            </button>
+          </div>
+
           <form onSubmit={handleFormSubmit} className="space-y-3">
-            {/* Beneficiary Name */}
-            <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200 shadow-xs">
-              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                Beneficiary Name *
-              </label>
-              <input
-                type="text"
-                value={beneficiaryName}
-                onChange={(e) => setBeneficiaryName(e.target.value)}
-                placeholder="Enter beneficiary name"
-                className="w-full h-11 px-3 rounded-lg border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-[#DB0011] outline-none"
-              />
-              {errors.beneficiaryName && (
-                <p className="text-[11px] text-[#DB0011] font-semibold mt-1">
-                  {errors.beneficiaryName}
-                </p>
-              )}
-            </div>
+            {/* TAB 1: ACCOUNT TRANSFER FIELDS */}
+            {transferTab === 'account' && (
+              <>
+                {/* Beneficiary Name */}
+                <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200 shadow-xs">
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    Beneficiary Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={beneficiaryName}
+                    onChange={(e) => setBeneficiaryName(e.target.value)}
+                    placeholder="Enter beneficiary name"
+                    className="w-full h-11 px-3 rounded-lg border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-[#DB0011] outline-none"
+                  />
+                  {errors.beneficiaryName && (
+                    <p className="text-[11px] text-[#DB0011] font-semibold mt-1">
+                      {errors.beneficiaryName}
+                    </p>
+                  )}
+                </div>
 
-            {/* Account Number & Confirm Account Number */}
-            <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200 shadow-xs space-y-2.5">
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Account Number *
-                </label>
-                <input
-                  type="text"
-                  maxLength={18}
-                  value={accountNumber}
-                  onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ''))}
-                  placeholder="Enter account number"
-                  className="w-full h-11 px-3 rounded-lg border border-slate-300 font-mono text-xs font-bold focus:ring-2 focus:ring-[#DB0011] outline-none"
-                />
-                {errors.accountNumber && (
-                  <p className="text-[11px] text-[#DB0011] font-semibold mt-1">
-                    {errors.accountNumber}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Confirm Account Number *
-                </label>
-                <input
-                  type="text"
-                  maxLength={18}
-                  value={confirmAccountNumber}
-                  onChange={(e) => setConfirmAccountNumber(e.target.value.replace(/\D/g, ''))}
-                  placeholder="Re-enter account number"
-                  className="w-full h-11 px-3 rounded-lg border border-slate-300 font-mono text-xs font-bold focus:ring-2 focus:ring-[#DB0011] outline-none"
-                />
-                {accountNumber.trim().length > 0 && confirmAccountNumber.trim().length > 0 && (
-                  <div className="mt-1 flex items-center gap-1 text-[11px]">
-                    {accountNumber === confirmAccountNumber ? (
-                      <span className="text-emerald-700 font-bold flex items-center gap-1">
-                        <Check className="w-3.5 h-3.5" /> Account numbers match
-                      </span>
-                    ) : (
-                      <span className="text-[#DB0011] font-semibold">
-                        Account numbers do not match
-                      </span>
+                {/* Account Number & Confirm Account Number */}
+                <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200 shadow-xs space-y-2.5">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Account Number *
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={18}
+                      value={accountNumber}
+                      onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ''))}
+                      placeholder="Enter account number"
+                      className="w-full h-11 px-3 rounded-lg border border-slate-300 font-mono text-xs font-bold focus:ring-2 focus:ring-[#DB0011] outline-none"
+                    />
+                    {errors.accountNumber && (
+                      <p className="text-[11px] text-[#DB0011] font-semibold mt-1">
+                        {errors.accountNumber}
+                      </p>
                     )}
                   </div>
-                )}
-                {errors.confirmAccountNumber && (
-                  <p className="text-[11px] text-[#DB0011] font-semibold mt-1">
-                    {errors.confirmAccountNumber}
-                  </p>
-                )}
-              </div>
-            </div>
 
-            {/* IFSC Code & Auto Bank Name */}
-            <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200 shadow-xs space-y-2">
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                    IFSC Code *
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Confirm Account Number *
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={18}
+                      value={confirmAccountNumber}
+                      onChange={(e) => setConfirmAccountNumber(e.target.value.replace(/\D/g, ''))}
+                      placeholder="Re-enter account number"
+                      className="w-full h-11 px-3 rounded-lg border border-slate-300 font-mono text-xs font-bold focus:ring-2 focus:ring-[#DB0011] outline-none"
+                    />
+                    {accountNumber.trim().length > 0 && confirmAccountNumber.trim().length > 0 && (
+                      <div className="mt-1 flex items-center gap-1 text-[11px]">
+                        {accountNumber === confirmAccountNumber ? (
+                          <span className="text-emerald-700 font-bold flex items-center gap-1">
+                            <Check className="w-3.5 h-3.5" /> Account numbers match
+                          </span>
+                        ) : (
+                          <span className="text-[#DB0011] font-semibold">
+                            Account numbers do not match
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {errors.confirmAccountNumber && (
+                      <p className="text-[11px] text-[#DB0011] font-semibold mt-1">
+                        {errors.confirmAccountNumber}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* IFSC Code & Auto Bank Name */}
+                <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200 shadow-xs space-y-2">
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                        IFSC Code *
+                      </label>
+                      <span className="text-[10px] text-slate-500">
+                        Format: 4 letters, 0, 6 digits/letters
+                      </span>
+                    </div>
+                    <input
+                      type="text"
+                      maxLength={11}
+                      value={ifscCode}
+                      onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
+                      placeholder="Ex: SBIN0001234"
+                      className="w-full h-11 px-3 rounded-lg border border-slate-300 font-mono text-xs font-bold uppercase focus:ring-2 focus:ring-[#DB0011] outline-none"
+                    />
+                    {errors.ifscCode && (
+                      <p className="text-[11px] text-[#DB0011] font-semibold mt-1">
+                        {errors.ifscCode}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Auto Bank Name display */}
+                  {ifscCode.trim().length >= 4 && bankName && (
+                    <div className="p-2.5 rounded-lg bg-[#F5F5F5] border border-slate-200 flex items-center gap-2 transition-all">
+                      <Building2 className="w-4 h-4 text-[#DB0011] shrink-0" />
+                      <div className="flex-1 truncate">
+                        <span className="text-[10px] text-slate-500 font-medium block">
+                          Bank Name (Auto-detected)
+                        </span>
+                        <span className="text-xs font-bold text-black truncate block">
+                          {bankName}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Account Type (Savings / Current) */}
+                <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200 shadow-xs">
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">
+                    Account Type
                   </label>
-                  <span className="text-[10px] text-slate-500">
-                    Format: 4 letters, 0, 6 digits/letters
-                  </span>
-                </div>
-                <input
-                  type="text"
-                  maxLength={11}
-                  value={ifscCode}
-                  onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
-                  placeholder="Ex: SBIN0001234"
-                  className="w-full h-11 px-3 rounded-lg border border-slate-300 font-mono text-xs font-bold uppercase focus:ring-2 focus:ring-[#DB0011] outline-none"
-                />
-                {errors.ifscCode && (
-                  <p className="text-[11px] text-[#DB0011] font-semibold mt-1">
-                    {errors.ifscCode}
-                  </p>
-                )}
-              </div>
-
-              {/* Auto Bank Name display - hidden until IFSC is typed */}
-              {ifscCode.trim().length >= 4 && bankName && (
-                <div className="p-2.5 rounded-lg bg-[#F5F5F5] border border-slate-200 flex items-center gap-2 transition-all">
-                  <Building2 className="w-4 h-4 text-[#DB0011] shrink-0" />
-                  <div className="flex-1 truncate">
-                    <span className="text-[10px] text-slate-500 font-medium block">
-                      Bank Name (Auto-detected)
-                    </span>
-                    <span className="text-xs font-bold text-black truncate block">
-                      {bankName}
-                    </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setAccountType('Savings')}
+                      className={`h-10 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                        accountType === 'Savings'
+                          ? 'bg-[#DB0011] text-white shadow-xs'
+                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      {accountType === 'Savings' && <Check className="w-3.5 h-3.5" />}
+                      <span>Savings</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAccountType('Current')}
+                      className={`h-10 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                        accountType === 'Current'
+                          ? 'bg-[#DB0011] text-white shadow-xs'
+                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      {accountType === 'Current' && <Check className="w-3.5 h-3.5" />}
+                      <span>Current</span>
+                    </button>
                   </div>
                 </div>
-              )}
-            </div>
 
-            {/* Account Type (Savings / Current) */}
-            <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200 shadow-xs">
-              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">
-                Account Type
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setAccountType('Savings')}
-                  className={`h-10 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                    accountType === 'Savings'
-                      ? 'bg-[#DB0011] text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                  }`}
-                >
-                  {accountType === 'Savings' && <Check className="w-3.5 h-3.5" />}
-                  <span>Savings</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setAccountType('Current')}
-                  className={`h-10 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                    accountType === 'Current'
-                      ? 'bg-[#DB0011] text-white shadow-xs'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                  }`}
-                >
-                  {accountType === 'Current' && <Check className="w-3.5 h-3.5" />}
-                  <span>Current</span>
-                </button>
-              </div>
-            </div>
+                {/* Transfer Mode (IMPS Instant / NEFT) */}
+                <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200 shadow-xs">
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">
+                    Transfer Mode
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setTransferMode('IMPS')}
+                      className={`p-2 rounded-lg text-left transition cursor-pointer border ${
+                        transferMode === 'IMPS'
+                          ? 'bg-red-50/80 border-[#DB0011] text-[#DB0011]'
+                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold">IMPS Instant</span>
+                        <span className="text-[9px] font-bold bg-[#DB0011] text-white px-1.5 py-0.2 rounded">
+                          24x7
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-slate-500 block mt-0.5">
+                        Immediate clearance
+                      </span>
+                    </button>
 
-            {/* Transfer Mode (IMPS Instant / NEFT) */}
-            <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200 shadow-xs">
-              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">
-                Transfer Mode
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setTransferMode('IMPS')}
-                  className={`p-2 rounded-lg text-left transition cursor-pointer border ${
-                    transferMode === 'IMPS'
-                      ? 'bg-red-50/80 border-[#DB0011] text-[#DB0011]'
-                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold">IMPS Instant</span>
-                    <span className="text-[9px] font-bold bg-[#DB0011] text-white px-1.5 py-0.2 rounded">
-                      24x7
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setTransferMode('NEFT')}
+                      className={`p-2 rounded-lg text-left transition cursor-pointer border ${
+                        transferMode === 'NEFT'
+                          ? 'bg-red-50/80 border-[#DB0011] text-[#DB0011]'
+                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold">NEFT</span>
+                        <span className="text-[9px] font-bold bg-slate-200 text-slate-700 px-1.5 py-0.2 rounded">
+                          Hourly
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-slate-500 block mt-0.5">
+                        Batch settlement
+                      </span>
+                    </button>
                   </div>
-                  <span className="text-[10px] text-slate-500 block mt-0.5">
-                    Immediate clearance
-                  </span>
-                </button>
+                </div>
+              </>
+            )}
 
-                <button
-                  type="button"
-                  onClick={() => setTransferMode('NEFT')}
-                  className={`p-2 rounded-lg text-left transition cursor-pointer border ${
-                    transferMode === 'NEFT'
-                      ? 'bg-red-50/80 border-[#DB0011] text-[#DB0011]'
-                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold">NEFT</span>
-                    <span className="text-[9px] font-bold bg-slate-200 text-slate-700 px-1.5 py-0.2 rounded">
-                      Hourly
-                    </span>
+            {/* TAB 2: MOBILE NUMBER / UPI TRANSFER FIELDS */}
+            {transferTab === 'upi' && (
+              <>
+                <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200 shadow-xs space-y-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Mobile Number or UPI ID *
+                    </label>
+                    <input
+                      type="text"
+                      value={upiIdentifier}
+                      onChange={(e) => setUpiIdentifier(e.target.value)}
+                      placeholder="Enter 10-digit mobile or UPI ID e.g. name@upi"
+                      className="w-full h-11 px-3 rounded-lg border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-[#DB0011] outline-none"
+                    />
+                    {errors.upiIdentifier && (
+                      <p className="text-[11px] text-[#DB0011] font-semibold mt-1">
+                        {errors.upiIdentifier}
+                      </p>
+                    )}
                   </div>
-                  <span className="text-[10px] text-slate-500 block mt-0.5">
-                    Batch settlement
-                  </span>
-                </button>
-              </div>
-            </div>
 
-            {/* Amount INR */}
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                      Payee Name (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={upiPayeeName}
+                      onChange={(e) => setUpiPayeeName(e.target.value)}
+                      placeholder="Enter payee name"
+                      className="w-full h-11 px-3 rounded-lg border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-[#DB0011] outline-none"
+                    />
+                  </div>
+
+                  <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-[11px] text-slate-600">
+                    <span className="text-[10px] text-slate-400 block font-bold uppercase">Payment Rail</span>
+                    <strong className="text-black">NPCI Unified Payments Interface (UPI 24x7)</strong>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Amount INR (Common to both) */}
             <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200 shadow-xs space-y-2">
               <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
                 Amount (INR) *
@@ -630,35 +730,63 @@ export const Screen6TransferForm: React.FC = () => {
             </div>
 
             <div className="space-y-2.5 text-xs">
-              <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Beneficiary Name</span>
-                <strong className="text-black font-bold text-right">{beneficiaryName}</strong>
-              </div>
+              {transferTab === 'account' ? (
+                <>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-500">Beneficiary Name</span>
+                    <strong className="text-black font-bold text-right">{beneficiaryName}</strong>
+                  </div>
 
-              <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">To Account</span>
-                <strong className="text-black font-mono font-bold text-right">{maskedAcc}</strong>
-              </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-500">To Account</span>
+                    <strong className="text-black font-mono font-bold text-right">{maskedAcc}</strong>
+                  </div>
 
-              <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Bank Name</span>
-                <span className="text-black font-semibold text-right">{bankName}</span>
-              </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-500">Bank Name</span>
+                    <span className="text-black font-semibold text-right">{bankName}</span>
+                  </div>
 
-              <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">IFSC Code</span>
-                <span className="text-black font-mono font-bold text-right">{ifscCode}</span>
-              </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-500">IFSC Code</span>
+                    <span className="text-black font-mono font-bold text-right">{ifscCode}</span>
+                  </div>
 
-              <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Account Type</span>
-                <span className="text-black font-semibold text-right">{accountType} Account</span>
-              </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-500">Account Type</span>
+                    <span className="text-black font-semibold text-right">{accountType} Account</span>
+                  </div>
 
-              <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Transfer Mode</span>
-                <span className="text-[#DB0011] font-bold text-right">{transferMode} (Instant)</span>
-              </div>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-500">Transfer Mode</span>
+                    <span className="text-[#DB0011] font-bold text-right">{transferMode} (Instant)</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-500">Transfer Mode</span>
+                    <span className="text-[#DB0011] font-bold text-right">Mobile / UPI Instant</span>
+                  </div>
+
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-500">Recipient UPI / Mobile</span>
+                    <strong className="text-black font-mono font-bold text-right">{upiIdentifier}</strong>
+                  </div>
+
+                  {upiPayeeName && (
+                    <div className="flex justify-between py-1 border-b border-slate-100">
+                      <span className="text-slate-500">Payee Name</span>
+                      <strong className="text-black font-bold text-right">{upiPayeeName}</strong>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between py-1 border-b border-slate-100">
+                    <span className="text-slate-500">Clearing Network</span>
+                    <span className="text-slate-800 font-semibold text-right">NPCI UPI Instant</span>
+                  </div>
+                </>
+              )}
 
               <div className="flex justify-between py-1 border-b border-slate-100">
                 <span className="text-slate-500">Remarks</span>
@@ -981,6 +1109,16 @@ export const Screen6TransferForm: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* GLOBAL FREEZE POPUP (Universal standard: Account Frozen, Your account has been frozen...) */}
+      <AccountFrozenModal
+        isOpen={showFreezePopup}
+        onClose={() => setShowFreezePopup(false)}
+        onSupportClick={() => {
+          setShowFreezePopup(false);
+          setShowSupportModal(true);
+        }}
+      />
 
       {/* Persistent Bottom Security Banner */}
       <footer className="p-3 bg-[#FFFFFF] border-t border-slate-200 text-center flex items-center justify-center gap-1.5 text-xs text-slate-500">

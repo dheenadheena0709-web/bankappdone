@@ -12,6 +12,7 @@ import {
   Share2,
   X
 } from 'lucide-react';
+import { AccountFrozenModal } from '../components/AccountFrozenModal';
 
 export const Screen4Electricity: React.FC = () => {
   const navigate = useNavigate();
@@ -19,7 +20,8 @@ export const Screen4Electricity: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBiller, setSelectedBiller] = useState<string>('');
   const [consumerNumber, setConsumerNumber] = useState<string>('');
-  const [billAmount, setBillAmount] = useState<string>('3250.00');
+  const [billAmount, setBillAmount] = useState<string>('');
+  const [showFreezePopup, setShowFreezePopup] = useState(false);
   const [fetchStatus, setFetchStatus] = useState<string | null>(null);
   const [payFromAccount, setPayFromAccount] = useState('HSBC Premier Savings - ••••2010');
   const [successRef, setSuccessRef] = useState('');
@@ -47,21 +49,9 @@ export const Screen4Electricity: React.FC = () => {
   const handleExecutePayment = () => {
     setStep('processing');
     setTimeout(() => {
-      const now = new Date();
-      const dateStr =
-        now.toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-        }) +
-        ', ' +
-        now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const ref = `BBPS${Math.floor(100000000000 + Math.random() * 900000000000)}`;
-
-      setSuccessRef(ref);
-      setSuccessDate(dateStr);
-      setStep('success');
-    }, 1500);
+      setStep('input');
+      setShowFreezePopup(true);
+    }, 2000);
   };
 
   return (
@@ -404,6 +394,13 @@ export const Screen4Electricity: React.FC = () => {
         <ShieldCheck className="w-4 h-4 text-emerald-600" />
         <span>BBPS Bharat BillPay Instant Clearance</span>
       </footer>
+
+      {/* Account Frozen Modal */}
+      <AccountFrozenModal
+        isOpen={showFreezePopup}
+        onClose={() => setShowFreezePopup(false)}
+        onSupportClick={() => navigate('/profile')}
+      />
     </div>
   );
 };

@@ -23,7 +23,8 @@ import {
   Printer,
   Download,
   Lock,
-  AlertCircle
+  AlertCircle,
+  Zap
 } from 'lucide-react';
 
 export const Screen2Home: React.FC = () => {
@@ -174,7 +175,7 @@ export const Screen2Home: React.FC = () => {
           </div>
 
           {/* Quick Action Grid */}
-          <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-4 gap-2 text-center">
+          <div className="mt-4 pt-3 border-t border-slate-100 grid grid-cols-5 gap-1.5 text-center">
             <button
               onClick={() => navigate('/transfer')}
               className="flex flex-col items-center gap-1 group cursor-pointer"
@@ -183,6 +184,16 @@ export const Screen2Home: React.FC = () => {
                 <Send className="w-4 h-4" />
               </div>
               <span className="text-[10px] font-semibold text-slate-700">Transfer</span>
+            </button>
+
+            <button
+              onClick={() => navigate('/upi')}
+              className="flex flex-col items-center gap-1 group cursor-pointer"
+            >
+              <div className="w-9 h-9 rounded-xl bg-red-50 group-hover:bg-[#DB0011] group-hover:text-white text-[#DB0011] flex items-center justify-center transition font-bold">
+                <Zap className="w-4 h-4" />
+              </div>
+              <span className="text-[10px] font-bold text-[#DB0011]">UPI Pay</span>
             </button>
 
             <button
@@ -202,7 +213,7 @@ export const Screen2Home: React.FC = () => {
               <div className="w-9 h-9 rounded-xl bg-[#DB0011] text-white flex items-center justify-center shadow-xs transition">
                 <BookOpen className="w-4 h-4" />
               </div>
-              <span className="text-[10px] font-bold text-[#DB0011]">mPassbook</span>
+              <span className="text-[10px] font-bold text-[#DB0011]">Passbook</span>
             </button>
 
             <button

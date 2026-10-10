@@ -11,3 +11,5 @@ export { Screen7PaymentSuccess } from './Screen7PaymentSuccess';
 export { Screen8Investment } from './Screen8Investment';
 export { Screen9Profile } from './Screen9Profile';
 export { Screen10Passbook } from './Screen10Passbook';
+export { ScreenUPI } from './ScreenUPI';
+export { ScreenQRScanner } from './ScreenQRScanner';

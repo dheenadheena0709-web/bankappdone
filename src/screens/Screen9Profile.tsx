@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { BottomNav } from '../components/BottomNav';
 import { useBank } from '../context/BankContext';
 import {
+  ArrowLeft,
   User,
   Phone,
   Briefcase,
@@ -57,9 +58,18 @@ export const Screen9Profile: React.FC = () => {
   return (
     <div className="flex-1 flex flex-col justify-between bg-[#F5F5F5] min-h-screen">
       {/* Header Background: #DB0011 */}
-      <header className="bg-[#DB0011] text-white px-4 pt-3 pb-5 shadow-sm">
-        <div className="flex items-center justify-between mb-3">
-          <h1 className="text-xl font-bold tracking-tight">My details & Settings</h1>
+      <header className="bg-[#DB0011] text-white px-4 pt-3 pb-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => navigate('/home')}
+              className="p-1 -ml-1 text-white hover:bg-black/10 rounded-lg transition cursor-pointer"
+              aria-label="Back"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <h1 className="text-xl font-bold tracking-tight">My details & Settings</h1>
+          </div>
           <button
             onClick={handleLogout}
             className="flex items-center gap-1 text-xs text-white/90 hover:text-white bg-black/15 px-2.5 py-1 rounded-md transition cursor-pointer font-bold"
@@ -67,25 +77,6 @@ export const Screen9Profile: React.FC = () => {
             <LogOut className="w-3.5 h-3.5" />
             <span>Log out</span>
           </button>
-        </div>
-
-        {/* User Card */}
-        <div className="flex items-center gap-3 bg-white text-black p-3 rounded-xl shadow-xs">
-          <div className="w-12 h-12 rounded-xl bg-[#DB0011] text-white font-black text-lg flex items-center justify-center shrink-0">
-            SMS
-          </div>
-          <div>
-            <div className="flex items-center gap-1">
-              <h2 className="text-sm font-bold text-black">{userAccount.holderName}</h2>
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            </div>
-            <p className="text-xs text-slate-500">
-              Account No: <strong className="font-mono text-black">{userAccount.accountNumber}</strong>
-            </p>
-            <p className="text-[10px] text-slate-400 font-medium">
-              IFSC: {userAccount.ifsc} · {userAccount.branch}
-            </p>
-          </div>
         </div>
       </header>
 

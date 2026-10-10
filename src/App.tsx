@@ -17,6 +17,7 @@ import { Screen8Investment } from './screens/Screen8Investment';
 import { Screen9Profile } from './screens/Screen9Profile';
 import { Screen10Passbook } from './screens/Screen10Passbook';
 import { ScreenQRScanner } from './screens/ScreenQRScanner';
+import { ScreenUPI } from './screens/ScreenUPI';
 
 export default function App() {
   return (
@@ -47,6 +48,9 @@ export default function App() {
 
             {/* Screen 5 - Pay and Transfer Main */}
             <Route path="/pay-and-transfer" element={<Screen5PayTransfer />} />
+
+            {/* UPI Dedicated Page */}
+            <Route path="/upi" element={<ScreenUPI />} />
 
             {/* Screen 6 - Transfer Form */}
             <Route path="/transfer" element={<Screen6TransferForm />} />

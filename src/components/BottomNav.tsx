@@ -15,7 +15,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTabOverride }) => {
     const path = location.pathname;
     if (path.includes('/home') || path === '/accounts') return 'home';
     if (path.includes('/investment')) return 'investment';
-    if (path.includes('/people-and-bills') || path.includes('/move-money') || path.includes('/transfer') || path.includes('/pay-and-transfer')) return 'move-money';
+    if (path.includes('/people-and-bills') || path.includes('/move-money') || path.includes('/transfer') || path.includes('/pay-and-transfer') || path.includes('/upi')) return 'move-money';
     if (path.includes('/support')) return 'support';
     if (path.includes('/mpassbook')) return 'passbook';
     return 'home';

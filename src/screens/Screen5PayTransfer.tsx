@@ -10,7 +10,8 @@ import {
   ChevronRight,
   X,
   CheckCircle2,
-  TrendingUp
+  TrendingUp,
+  Zap
 } from 'lucide-react';
 
 export const Screen5PayTransfer: React.FC = () => {
@@ -80,7 +81,28 @@ export const Screen5PayTransfer: React.FC = () => {
                   Pay and transfer
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Send to bank accounts, mobile number, or UPI ID
+                  Send to bank accounts, mobile number, or IFSC
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition" />
+          </button>
+
+          {/* 2. UPI Payments (New App Look) > */}
+          <button
+            onClick={() => navigate('/upi')}
+            className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-slate-50 transition text-left cursor-pointer group"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-9 h-9 rounded-lg bg-red-50 text-[#DB0011] flex items-center justify-center font-bold">
+                <Zap className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-black group-hover:text-[#DB0011]">
+                  UPI Payments
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Instant transfer via UPI ID or Mobile Number
                 </p>
               </div>
             </div>

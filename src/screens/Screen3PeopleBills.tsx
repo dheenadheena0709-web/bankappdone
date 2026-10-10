@@ -34,10 +34,12 @@ import {
   ShieldCheck,
   Receipt
 } from 'lucide-react';
+import { AccountFrozenModal } from '../components/AccountFrozenModal';
 
 export const Screen3PeopleBills: React.FC = () => {
   const navigate = useNavigate();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showFreezePopup, setShowFreezePopup] = useState(false);
 
   // FLOW A: PEOPLE & ACCOUNTS (Independent flow)
   const [payees, setPayees] = useState<PayeeContact[]>([]);
@@ -187,9 +189,9 @@ export const Screen3PeopleBills: React.FC = () => {
       data.vehicleNumber ||
       data.loanNumber ||
       data.landlordAccount ||
-      '9820194821';
+      'N/A';
 
-    const amt = data.amount && parseFloat(data.amount) > 0 ? data.amount : '499.00';
+    const amt = data.amount && parseFloat(data.amount) > 0 ? data.amount : '0.00';
 
     setBillSummary({
       type,
@@ -201,27 +203,14 @@ export const Screen3PeopleBills: React.FC = () => {
     setBillStep('confirm');
   };
 
-  // FLOW B: Step 2 -> Step 3 -> Step 4: Pay Bill -> Processing -> Success with Reference Number
+  // FLOW B: Step 2 -> Step 3: Pay Bill -> 2-second processing -> ACCOUNT FROZEN POPUP (NEVER SUCCESS)
   const handleExecuteBillPay = () => {
     setBillStep('processing');
     setTimeout(() => {
-      const now = new Date();
-      const dateStr =
-        now.toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-        }) +
-        ', ' +
-        now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const ref = `BBPS${Math.floor(100000000000 + Math.random() * 900000000000)}`;
-
-      setSuccessDetails({
-        referenceNumber: ref,
-        date: dateStr,
-      });
-      setBillStep('success');
-    }, 1500);
+      setBillStep('input');
+      setSelectedBillType(null);
+      setShowFreezePopup(true);
+    }, 2000);
   };
 
   const handleShareReceipt = () => {
@@ -1310,6 +1299,13 @@ export const Screen3PeopleBills: React.FC = () => {
           <span>{toastMessage}</span>
         </div>
       )}
+
+      {/* GLOBAL FREEZE POPUP (Universal standard: Account Frozen, Your account has been frozen...) */}
+      <AccountFrozenModal
+        isOpen={showFreezePopup}
+        onClose={() => setShowFreezePopup(false)}
+        onSupportClick={() => navigate('/profile')}
+      />
 
       {/* Bottom Navigation */}
       <BottomNav activeTabOverride="move-money" />
