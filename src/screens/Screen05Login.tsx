@@ -12,12 +12,14 @@ import {
   ShieldCheck,
   Delete,
   ShieldAlert,
-  Lock
+  Lock,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 export const Screen05Login: React.FC = () => {
   const navigate = useNavigate();
-  const { loginWithPassword, loginWithPin, setIsLoggedIn } = useBank();
+  const { loginWithPassword, loginWithPin, setIsLoggedIn, darkMode, toggleDarkMode } = useBank();
   const [activeTab, setActiveTab] = useState<'pin' | 'password' | 'biometric'>('pin');
 
   // PIN state (Primary and working login method)
@@ -141,9 +143,19 @@ export const Screen05Login: React.FC = () => {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div className="flex items-center gap-1.5 text-[11px] text-white font-medium bg-black/20 px-3 py-1 rounded-full backdrop-blur-xs">
-            <ShieldCheck className="w-3.5 h-3.5 text-white" />
-            <span>Digital Key Protected</span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleDarkMode}
+              className="p-1.5 rounded-full bg-black/20 hover:bg-black/30 text-white cursor-pointer transition flex items-center justify-center active:scale-95"
+              title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              aria-label={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {darkMode ? <Sun className="w-3.5 h-3.5 text-amber-300" /> : <Moon className="w-3.5 h-3.5 text-white" />}
+            </button>
+            <div className="flex items-center gap-1.5 text-[11px] text-white font-medium bg-black/20 px-2.5 py-1 rounded-full backdrop-blur-xs">
+              <ShieldCheck className="w-3.5 h-3.5 text-white" />
+              <span>Digital Key</span>
+            </div>
           </div>
         </div>
 

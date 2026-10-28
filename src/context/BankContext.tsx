@@ -418,12 +418,18 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     if (typeof window !== 'undefined' && window.localStorage) {
-      const stored = localStorage.getItem('hsbc_theme');
+      // Clear legacy dark default if user hadn't explicitly chosen
+      const legacy = localStorage.getItem('hsbc_theme');
+      if (legacy !== null && !localStorage.getItem('hsbc_theme_mode')) {
+        localStorage.removeItem('hsbc_theme');
+      }
+      const stored = localStorage.getItem('hsbc_theme_mode');
       if (stored !== null) {
         return stored === 'dark';
       }
     }
-    return true;
+    // Default to Light Mode as requested
+    return false;
   });
 
   useEffect(() => {
@@ -436,7 +442,8 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         document.body.classList.remove('dark');
       }
       if (typeof window !== 'undefined' && window.localStorage) {
-        localStorage.setItem('hsbc_theme', darkMode ? 'dark' : 'light');
+        localStorage.setItem('hsbc_theme_mode', darkMode ? 'dark' : 'light');
+        localStorage.removeItem('hsbc_theme');
       }
       const themeColorMeta = document.querySelector('meta[name="theme-color"]');
       if (themeColorMeta) {

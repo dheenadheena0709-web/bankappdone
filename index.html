@@ -27,11 +27,18 @@
     <script>
       (function() {
         try {
-          var theme = localStorage.getItem('hsbc_theme');
-          if (theme === 'dark' || theme === null) {
+          var theme = localStorage.getItem('hsbc_theme_mode');
+          if (!theme) {
+            localStorage.removeItem('hsbc_theme');
+            localStorage.setItem('hsbc_theme_mode', 'light');
+            theme = 'light';
+          }
+          if (theme === 'dark') {
             document.documentElement.classList.add('dark');
+            document.body && document.body.classList.add('dark');
           } else {
             document.documentElement.classList.remove('dark');
+            document.body && document.body.classList.remove('dark');
           }
         } catch (e) {}
       })();
