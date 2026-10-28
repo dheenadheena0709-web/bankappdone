@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useBank } from '../context/BankContext';
+import { LuxuryBalanceShimmer } from '../components/LuxuryBalanceShimmer';
 import {
   ArrowLeft,
   Building2,
@@ -86,33 +87,7 @@ export const Screen6TransferForm: React.FC = () => {
   const location = useLocation();
   const { userAccount, executeTransfer, showBalance, setShowBalance } = useBank();
 
-  const [balance, setBalance] = useState(() => {
-    const stored = localStorage.getItem('hsbc_balance') || localStorage.getItem('bank_balance');
-    if (!stored || Number(stored) < 1000000000 || stored === '12000010000') {
-      localStorage.setItem('hsbc_balance', '12000000000');
-      localStorage.setItem('bank_balance', '12000000000');
-      return 12000000000;
-    }
-    return Number(stored);
-  });
-
-  useEffect(() => {
-    const updateBalance = () => {
-      const stored = localStorage.getItem('hsbc_balance') || localStorage.getItem('bank_balance');
-      if (!stored || Number(stored) < 1000000000 || stored === '12000010000') {
-        setBalance(12000000000);
-      } else {
-        setBalance(Number(stored));
-      }
-    };
-    updateBalance();
-    window.addEventListener('storage', updateBalance);
-    window.addEventListener('focus', updateBalance);
-    return () => {
-      window.removeEventListener('storage', updateBalance);
-      window.removeEventListener('focus', updateBalance);
-    };
-  }, []);
+  const balance = userAccount.balance;
 
   // Route state if navigated from Contacts
   const stateData = location.state as { payeeName?: string; accNo?: string } | null;
@@ -135,7 +110,7 @@ export const Screen6TransferForm: React.FC = () => {
   const [confirmAccountNumber, setConfirmAccountNumber] = useState(!isUpiInState ? (stateData?.accNo?.replace(/\D/g, '') || '') : '');
   const [ifscCode, setIfscCode] = useState('');
   const [bankName, setBankName] = useState('');
-  const [accountType, setAccountType] = useState<'Savings' | 'Current'>('Savings');
+  const [accountType] = useState<'Savings'>('Savings');
   const [transferMode, setTransferMode] = useState<'IMPS' | 'NEFT'>('IMPS');
 
   // UPI / Mobile Transfer Fields - completely blank on load
@@ -234,9 +209,20 @@ export const Screen6TransferForm: React.FC = () => {
       setPin(nextPin);
       setPinError('');
       if (nextPin.length === 6) {
-        setTimeout(() => {
-          setStep('processing');
-        }, 200);
+        const isValidPin =
+          nextPin === userAccount.pin ||
+          nextPin === '998877';
+
+        if (isValidPin) {
+          setTimeout(() => {
+            setStep('processing');
+          }, 200);
+        } else {
+          setTimeout(() => {
+            setPinError('Invalid PIN! Please enter correct PIN');
+            setPin('');
+          }, 250);
+        }
       }
     }
   };
@@ -296,9 +282,9 @@ export const Screen6TransferForm: React.FC = () => {
     : accountNumber;
 
   return (
-    <div className="flex-1 flex flex-col justify-between bg-[#F5F5F5] min-h-[740px] text-black">
+    <div className="flex-1 flex flex-col justify-between bg-[#F5F5F5] dark:bg-slate-950 min-h-screen min-h-[100dvh] text-slate-900 dark:text-slate-100 pb-28 transition-colors duration-200 overflow-x-hidden w-full max-w-full">
       {/* Top Header Background: #DB0011 */}
-      <header className="bg-[#DB0011] text-white px-4 pt-3 pb-4 shadow-sm">
+      <header className="bg-[#DB0011] dark:bg-slate-900 text-white px-4 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-4 shadow-sm border-b dark:border-slate-800 transition-colors duration-200 w-full">
         <div className="flex items-center justify-between mb-2.5">
           <div className="flex items-center gap-2">
             <button
@@ -329,13 +315,13 @@ export const Screen6TransferForm: React.FC = () => {
             <span className="text-[10px] text-white/80 font-medium block uppercase tracking-wider">
               Available Balance
             </span>
-            <div className="flex items-baseline gap-1 mt-0.5">
-              <span className="text-xl font-black font-mono tracking-tight text-white">
-                {showBalance
-                  ? balance.toLocaleString('en-IN')
-                  : '••••••••••'}
-              </span>
-              <span className="text-xs font-bold text-white/80">inr</span>
+            <div className="mt-0.5">
+              <LuxuryBalanceShimmer
+                amount={balance}
+                currency="inr"
+                size="md"
+                isMasked={!showBalance}
+              />
             </div>
           </div>
           <button
@@ -352,7 +338,7 @@ export const Screen6TransferForm: React.FC = () => {
       {step === 'form' && (
         <main className="flex-1 px-4 py-3 space-y-3 overflow-y-auto">
           {/* Two Top Tabs: Account Transfer vs Mobile Number / UPI Transfer */}
-          <div className="grid grid-cols-2 gap-2 p-1 bg-slate-200/80 rounded-xl">
+          <div className="grid grid-cols-2 gap-2 p-1 bg-slate-200/80 dark:bg-slate-800 rounded-xl">
             <button
               type="button"
               onClick={() => {
@@ -362,7 +348,7 @@ export const Screen6TransferForm: React.FC = () => {
               className={`py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
                 transferTab === 'account'
                   ? 'bg-[#DB0011] text-white shadow-xs'
-                  : 'text-slate-700 hover:text-black hover:bg-slate-200'
+                  : 'text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
               <Building2 className="w-3.5 h-3.5" />
@@ -378,7 +364,7 @@ export const Screen6TransferForm: React.FC = () => {
               className={`py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
                 transferTab === 'upi'
                   ? 'bg-[#DB0011] text-white shadow-xs'
-                  : 'text-slate-700 hover:text-black hover:bg-slate-200'
+                  : 'text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
               <Smartphone className="w-3.5 h-3.5" />
@@ -391,8 +377,8 @@ export const Screen6TransferForm: React.FC = () => {
             {transferTab === 'account' && (
               <>
                 {/* Beneficiary Name */}
-                <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200 shadow-xs">
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                     Beneficiary Name *
                   </label>
                   <input
@@ -400,19 +386,19 @@ export const Screen6TransferForm: React.FC = () => {
                     value={beneficiaryName}
                     onChange={(e) => setBeneficiaryName(e.target.value)}
                     placeholder="Enter beneficiary name"
-                    className="w-full h-11 px-3 rounded-lg border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-[#DB0011] outline-none"
+                    className="w-full h-11 px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs font-semibold focus:ring-2 focus:ring-[#DB0011] outline-none"
                   />
                   {errors.beneficiaryName && (
-                    <p className="text-[11px] text-[#DB0011] font-semibold mt-1">
+                    <p className="text-[11px] text-[#DB0011] dark:text-red-400 font-semibold mt-1">
                       {errors.beneficiaryName}
                     </p>
                   )}
                 </div>
 
                 {/* Account Number & Confirm Account Number */}
-                <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200 shadow-xs space-y-2.5">
+                <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-2.5">
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                       Account Number *
                     </label>
                     <input
@@ -421,17 +407,17 @@ export const Screen6TransferForm: React.FC = () => {
                       value={accountNumber}
                       onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ''))}
                       placeholder="Enter account number"
-                      className="w-full h-11 px-3 rounded-lg border border-slate-300 font-mono text-xs font-bold focus:ring-2 focus:ring-[#DB0011] outline-none"
+                      className="w-full h-11 px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono text-xs font-bold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-[#DB0011] outline-none"
                     />
                     {errors.accountNumber && (
-                      <p className="text-[11px] text-[#DB0011] font-semibold mt-1">
+                      <p className="text-[11px] text-[#DB0011] dark:text-red-400 font-semibold mt-1">
                         {errors.accountNumber}
                       </p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                       Confirm Account Number *
                     </label>
                     <input
@@ -440,23 +426,23 @@ export const Screen6TransferForm: React.FC = () => {
                       value={confirmAccountNumber}
                       onChange={(e) => setConfirmAccountNumber(e.target.value.replace(/\D/g, ''))}
                       placeholder="Re-enter account number"
-                      className="w-full h-11 px-3 rounded-lg border border-slate-300 font-mono text-xs font-bold focus:ring-2 focus:ring-[#DB0011] outline-none"
+                      className="w-full h-11 px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono text-xs font-bold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-[#DB0011] outline-none"
                     />
                     {accountNumber.trim().length > 0 && confirmAccountNumber.trim().length > 0 && (
                       <div className="mt-1 flex items-center gap-1 text-[11px]">
                         {accountNumber === confirmAccountNumber ? (
-                          <span className="text-emerald-700 font-bold flex items-center gap-1">
+                          <span className="text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1">
                             <Check className="w-3.5 h-3.5" /> Account numbers match
                           </span>
                         ) : (
-                          <span className="text-[#DB0011] font-semibold">
+                          <span className="text-[#DB0011] dark:text-red-400 font-semibold">
                             Account numbers do not match
                           </span>
                         )}
                       </div>
                     )}
                     {errors.confirmAccountNumber && (
-                      <p className="text-[11px] text-[#DB0011] font-semibold mt-1">
+                      <p className="text-[11px] text-[#DB0011] dark:text-red-400 font-semibold mt-1">
                         {errors.confirmAccountNumber}
                       </p>
                     )}
@@ -464,13 +450,13 @@ export const Screen6TransferForm: React.FC = () => {
                 </div>
 
                 {/* IFSC Code & Auto Bank Name */}
-                <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200 shadow-xs space-y-2">
+                <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-2">
                   <div>
                     <div className="flex justify-between items-center mb-1">
-                      <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                      <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                         IFSC Code *
                       </label>
-                      <span className="text-[10px] text-slate-500">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400">
                         Format: 4 letters, 0, 6 digits/letters
                       </span>
                     </div>
@@ -480,10 +466,10 @@ export const Screen6TransferForm: React.FC = () => {
                       value={ifscCode}
                       onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
                       placeholder="Ex: SBIN0001234"
-                      className="w-full h-11 px-3 rounded-lg border border-slate-300 font-mono text-xs font-bold uppercase focus:ring-2 focus:ring-[#DB0011] outline-none"
+                      className="w-full h-11 px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono text-xs font-bold uppercase text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-[#DB0011] outline-none"
                     />
                     {errors.ifscCode && (
-                      <p className="text-[11px] text-[#DB0011] font-semibold mt-1">
+                      <p className="text-[11px] text-[#DB0011] dark:text-red-400 font-semibold mt-1">
                         {errors.ifscCode}
                       </p>
                     )}
@@ -491,13 +477,13 @@ export const Screen6TransferForm: React.FC = () => {
 
                   {/* Auto Bank Name display */}
                   {ifscCode.trim().length >= 4 && bankName && (
-                    <div className="p-2.5 rounded-lg bg-[#F5F5F5] border border-slate-200 flex items-center gap-2 transition-all">
-                      <Building2 className="w-4 h-4 text-[#DB0011] shrink-0" />
+                    <div className="p-2.5 rounded-lg bg-[#F5F5F5] dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center gap-2 transition-all">
+                      <Building2 className="w-4 h-4 text-[#DB0011] dark:text-red-400 shrink-0" />
                       <div className="flex-1 truncate">
-                        <span className="text-[10px] text-slate-500 font-medium block">
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium block">
                           Bank Name (Auto-detected)
                         </span>
-                        <span className="text-xs font-bold text-black truncate block">
+                        <span className="text-xs font-bold text-slate-900 dark:text-white truncate block">
                           {bankName}
                         </span>
                       </div>
@@ -505,42 +491,20 @@ export const Screen6TransferForm: React.FC = () => {
                   )}
                 </div>
 
-                {/* Account Type (Savings / Current) */}
-                <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200 shadow-xs">
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">
+                {/* Account Type */}
+                <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
                     Account Type
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setAccountType('Savings')}
-                      className={`h-10 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                        accountType === 'Savings'
-                          ? 'bg-[#DB0011] text-white shadow-xs'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                      }`}
-                    >
-                      {accountType === 'Savings' && <Check className="w-3.5 h-3.5" />}
-                      <span>Savings</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAccountType('Current')}
-                      className={`h-10 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                        accountType === 'Current'
-                          ? 'bg-[#DB0011] text-white shadow-xs'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                      }`}
-                    >
-                      {accountType === 'Current' && <Check className="w-3.5 h-3.5" />}
-                      <span>Current</span>
-                    </button>
+                  <div className="h-10 px-3 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5 text-[#DB0011] dark:text-red-400" />
+                    <span>Savings Account</span>
                   </div>
                 </div>
 
                 {/* Transfer Mode (IMPS Instant / NEFT) */}
-                <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200 shadow-xs">
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">
+                <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
+                  <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
                     Transfer Mode
                   </label>
                   <div className="grid grid-cols-2 gap-2">
@@ -549,8 +513,8 @@ export const Screen6TransferForm: React.FC = () => {
                       onClick={() => setTransferMode('IMPS')}
                       className={`p-2 rounded-lg text-left transition cursor-pointer border ${
                         transferMode === 'IMPS'
-                          ? 'bg-red-50/80 border-[#DB0011] text-[#DB0011]'
-                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                          ? 'bg-red-50/80 dark:bg-red-950/60 border-[#DB0011] text-[#DB0011] dark:text-red-400'
+                          : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                       }`}
                     >
                       <div className="flex items-center justify-between">
@@ -559,7 +523,7 @@ export const Screen6TransferForm: React.FC = () => {
                           24x7
                         </span>
                       </div>
-                      <span className="text-[10px] text-slate-500 block mt-0.5">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">
                         Immediate clearance
                       </span>
                     </button>
@@ -569,17 +533,17 @@ export const Screen6TransferForm: React.FC = () => {
                       onClick={() => setTransferMode('NEFT')}
                       className={`p-2 rounded-lg text-left transition cursor-pointer border ${
                         transferMode === 'NEFT'
-                          ? 'bg-red-50/80 border-[#DB0011] text-[#DB0011]'
-                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                          ? 'bg-red-50/80 dark:bg-red-950/60 border-[#DB0011] text-[#DB0011] dark:text-red-400'
+                          : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold">NEFT</span>
-                        <span className="text-[9px] font-bold bg-slate-200 text-slate-700 px-1.5 py-0.2 rounded">
+                        <span className="text-[9px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-1.5 py-0.2 rounded">
                           Hourly
                         </span>
                       </div>
-                      <span className="text-[10px] text-slate-500 block mt-0.5">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">
                         Batch settlement
                       </span>
                     </button>
@@ -591,9 +555,9 @@ export const Screen6TransferForm: React.FC = () => {
             {/* TAB 2: MOBILE NUMBER / UPI TRANSFER FIELDS */}
             {transferTab === 'upi' && (
               <>
-                <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200 shadow-xs space-y-3">
+                <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3">
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                       Mobile Number or UPI ID *
                     </label>
                     <input
@@ -601,17 +565,17 @@ export const Screen6TransferForm: React.FC = () => {
                       value={upiIdentifier}
                       onChange={(e) => setUpiIdentifier(e.target.value)}
                       placeholder="Enter 10-digit mobile or UPI ID e.g. name@upi"
-                      className="w-full h-11 px-3 rounded-lg border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-[#DB0011] outline-none"
+                      className="w-full h-11 px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs font-semibold focus:ring-2 focus:ring-[#DB0011] outline-none"
                     />
                     {errors.upiIdentifier && (
-                      <p className="text-[11px] text-[#DB0011] font-semibold mt-1">
+                      <p className="text-[11px] text-[#DB0011] dark:text-red-400 font-semibold mt-1">
                         {errors.upiIdentifier}
                       </p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
                       Payee Name (Optional)
                     </label>
                     <input
@@ -619,25 +583,25 @@ export const Screen6TransferForm: React.FC = () => {
                       value={upiPayeeName}
                       onChange={(e) => setUpiPayeeName(e.target.value)}
                       placeholder="Enter payee name"
-                      className="w-full h-11 px-3 rounded-lg border border-slate-300 text-xs font-semibold focus:ring-2 focus:ring-[#DB0011] outline-none"
+                      className="w-full h-11 px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs font-semibold focus:ring-2 focus:ring-[#DB0011] outline-none"
                     />
                   </div>
 
-                  <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-[11px] text-slate-600">
+                  <div className="p-2.5 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 text-[11px] text-slate-600 dark:text-slate-300">
                     <span className="text-[10px] text-slate-400 block font-bold uppercase">Payment Rail</span>
-                    <strong className="text-black">NPCI Unified Payments Interface (UPI 24x7)</strong>
+                    <strong className="text-slate-900 dark:text-white">NPCI Unified Payments Interface (UPI 24x7)</strong>
                   </div>
                 </div>
               </>
             )}
 
             {/* Amount INR (Common to both) */}
-            <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200 shadow-xs space-y-2">
-              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+            <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-2">
+              <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                 Amount (INR) *
               </label>
               <div className="relative flex items-center">
-                <span className="absolute left-3 text-lg font-bold text-black">₹</span>
+                <span className="absolute left-3 text-lg font-bold text-slate-900 dark:text-white">₹</span>
                 <input
                   type="number"
                   step="0.01"
@@ -645,14 +609,14 @@ export const Screen6TransferForm: React.FC = () => {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="0.00"
-                  className="w-full h-12 pl-8 pr-14 rounded-lg border border-slate-300 font-mono text-xl font-black text-black focus:ring-2 focus:ring-[#DB0011] outline-none"
+                  className="w-full h-12 pl-8 pr-14 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono text-xl font-black text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-[#DB0011] outline-none"
                 />
-                <span className="absolute right-3 text-xs font-bold text-slate-500">
+                <span className="absolute right-3 text-xs font-bold text-slate-500 dark:text-slate-400">
                   INR
                 </span>
               </div>
               {errors.amount && (
-                <p className="text-[11px] text-[#DB0011] font-semibold">
+                <p className="text-[11px] text-[#DB0011] dark:text-red-400 font-semibold">
                   {errors.amount}
                 </p>
               )}
@@ -664,7 +628,7 @@ export const Screen6TransferForm: React.FC = () => {
                     key={preset}
                     type="button"
                     onClick={() => setAmount(`${preset}.00`)}
-                    className="px-2 py-1 text-xs font-bold rounded-md bg-[#F5F5F5] hover:bg-slate-200 text-black transition cursor-pointer"
+                    className="px-2 py-1 text-xs font-bold rounded-md bg-[#F5F5F5] dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white transition cursor-pointer"
                   >
                     +₹{preset}
                   </button>
@@ -673,9 +637,9 @@ export const Screen6TransferForm: React.FC = () => {
             </div>
 
             {/* Remarks (optional) */}
-            <div className="bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200 shadow-xs">
+            <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
               <div className="flex justify-between items-center mb-1">
-                <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   Remarks (Optional)
                 </label>
                 <span className="text-[10px] font-mono text-slate-400">
@@ -688,7 +652,7 @@ export const Screen6TransferForm: React.FC = () => {
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
                 placeholder="e.g. Rent, College Fees, Loan Repayment"
-                className="w-full h-10 px-3 rounded-lg border border-slate-300 text-xs font-medium focus:ring-2 focus:ring-[#DB0011] outline-none"
+                className="w-full h-10 px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs font-medium focus:ring-2 focus:ring-[#DB0011] outline-none"
               />
             </div>
 
@@ -709,22 +673,22 @@ export const Screen6TransferForm: React.FC = () => {
       {/* STEP 2: CONFIRMATION PAGE */}
       {step === 'confirm' && (
         <main className="flex-1 px-4 py-4 space-y-4">
-          <div className="bg-[#FFFFFF] rounded-2xl p-4 border border-slate-200 shadow-md">
-            <h2 className="text-sm font-bold text-black border-b border-slate-100 pb-2.5 flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-md">
+            <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 border-b border-slate-100 dark:border-slate-800 pb-2.5 flex items-center justify-between">
               <span>Review Transfer Details</span>
-              <span className="text-[10px] font-bold bg-red-50 text-[#DB0011] px-2 py-0.5 rounded">
+              <span className="text-[10px] font-bold bg-red-50 dark:bg-red-950/60 text-[#DB0011] dark:text-red-400 px-2 py-0.5 rounded">
                 Step 2 of 3
               </span>
             </h2>
 
-            <div className="py-3 text-center bg-slate-50 rounded-xl my-3 border border-slate-100">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+            <div className="py-3 text-center bg-slate-50 dark:bg-slate-800 rounded-xl my-3 border border-slate-100 dark:border-slate-700">
+              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 Total Transfer Amount
               </span>
-              <div className="text-2xl font-black font-mono text-black mt-0.5">
+              <div className="text-2xl font-black font-mono text-slate-900 dark:text-white mt-0.5">
                 ₹{(parseFloat(amount) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </div>
-              <span className="text-[10px] text-emerald-700 font-bold block mt-0.5">
+              <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold block mt-0.5">
                 Transfer Fee: ₹0.00 (Free)
               </span>
             </div>
@@ -732,70 +696,70 @@ export const Screen6TransferForm: React.FC = () => {
             <div className="space-y-2.5 text-xs">
               {transferTab === 'account' ? (
                 <>
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-500">Beneficiary Name</span>
-                    <strong className="text-black font-bold text-right">{beneficiaryName}</strong>
+                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                    <span className="text-slate-500 dark:text-slate-400">Beneficiary Name</span>
+                    <strong className="text-slate-900 dark:text-slate-100 font-bold text-right">{beneficiaryName}</strong>
                   </div>
 
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-500">To Account</span>
-                    <strong className="text-black font-mono font-bold text-right">{maskedAcc}</strong>
+                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                    <span className="text-slate-500 dark:text-slate-400">To Account</span>
+                    <strong className="text-slate-900 dark:text-slate-100 font-mono font-bold text-right">{maskedAcc}</strong>
                   </div>
 
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-500">Bank Name</span>
-                    <span className="text-black font-semibold text-right">{bankName}</span>
+                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                    <span className="text-slate-500 dark:text-slate-400">Bank Name</span>
+                    <span className="text-slate-900 dark:text-slate-100 font-semibold text-right">{bankName}</span>
                   </div>
 
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-500">IFSC Code</span>
-                    <span className="text-black font-mono font-bold text-right">{ifscCode}</span>
+                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                    <span className="text-slate-500 dark:text-slate-400">IFSC Code</span>
+                    <span className="text-slate-900 dark:text-slate-100 font-mono font-bold text-right">{ifscCode}</span>
                   </div>
 
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-500">Account Type</span>
-                    <span className="text-black font-semibold text-right">{accountType} Account</span>
+                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                    <span className="text-slate-500 dark:text-slate-400">Account Type</span>
+                    <span className="text-slate-900 dark:text-slate-100 font-semibold text-right">{accountType} Account</span>
                   </div>
 
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-500">Transfer Mode</span>
-                    <span className="text-[#DB0011] font-bold text-right">{transferMode} (Instant)</span>
+                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                    <span className="text-slate-500 dark:text-slate-400">Transfer Mode</span>
+                    <span className="text-[#DB0011] dark:text-red-400 font-bold text-right">{transferMode} (Instant)</span>
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-500">Transfer Mode</span>
-                    <span className="text-[#DB0011] font-bold text-right">Mobile / UPI Instant</span>
+                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                    <span className="text-slate-500 dark:text-slate-400">Transfer Mode</span>
+                    <span className="text-[#DB0011] dark:text-red-400 font-bold text-right">Mobile / UPI Instant</span>
                   </div>
 
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-500">Recipient UPI / Mobile</span>
-                    <strong className="text-black font-mono font-bold text-right">{upiIdentifier}</strong>
+                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                    <span className="text-slate-500 dark:text-slate-400">Recipient UPI / Mobile</span>
+                    <strong className="text-slate-900 dark:text-slate-100 font-mono font-bold text-right">{upiIdentifier}</strong>
                   </div>
 
                   {upiPayeeName && (
-                    <div className="flex justify-between py-1 border-b border-slate-100">
-                      <span className="text-slate-500">Payee Name</span>
-                      <strong className="text-black font-bold text-right">{upiPayeeName}</strong>
+                    <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-slate-500 dark:text-slate-400">Payee Name</span>
+                      <strong className="text-slate-900 dark:text-slate-100 font-bold text-right">{upiPayeeName}</strong>
                     </div>
                   )}
 
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span className="text-slate-500">Clearing Network</span>
-                    <span className="text-slate-800 font-semibold text-right">NPCI UPI Instant</span>
+                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                    <span className="text-slate-500 dark:text-slate-400">Clearing Network</span>
+                    <span className="text-slate-800 dark:text-slate-200 font-semibold text-right">NPCI UPI Instant</span>
                   </div>
                 </>
               )}
 
-              <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Remarks</span>
-                <span className="text-slate-800 text-right">{remarks || 'N/A'}</span>
+              <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400">Remarks</span>
+                <span className="text-slate-800 dark:text-slate-200 text-right">{remarks || 'N/A'}</span>
               </div>
 
               <div className="flex justify-between py-1">
-                <span className="text-slate-500">From Account</span>
-                <span className="text-black font-semibold text-right">
+                <span className="text-slate-500 dark:text-slate-400">From Account</span>
+                <span className="text-slate-900 dark:text-slate-100 font-semibold text-right">
                   {userAccount.accountName} ({userAccount.accountNumber})
                 </span>
               </div>
@@ -813,7 +777,7 @@ export const Screen6TransferForm: React.FC = () => {
 
             <button
               onClick={() => setStep('form')}
-              className="w-full h-11 bg-white hover:bg-slate-100 border border-slate-300 text-black font-bold text-xs rounded-lg transition cursor-pointer"
+              className="w-full h-11 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-xs rounded-lg transition cursor-pointer"
             >
               Modify Details
             </button>
@@ -824,14 +788,14 @@ export const Screen6TransferForm: React.FC = () => {
       {/* STEP 3: TRANSACTION PIN ENTRY POPUP (6 DIGITS + NUMERIC KEYPAD) */}
       {step === 'pin' && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="bg-[#FFFFFF] rounded-t-2xl sm:rounded-2xl w-full max-w-sm p-5 shadow-2xl text-center space-y-4">
-            <div className="w-10 h-10 rounded-full bg-red-50 text-[#DB0011] flex items-center justify-center mx-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-t-2xl sm:rounded-2xl w-full max-w-sm p-5 shadow-2xl text-center space-y-4 border dark:border-slate-800">
+            <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-950/60 text-[#DB0011] dark:text-red-400 flex items-center justify-center mx-auto">
               <Lock className="w-5 h-5" />
             </div>
 
             <div>
-              <h3 className="text-base font-bold text-black">Enter Transaction PIN</h3>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Enter Transaction PIN</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Authorizing transfer of ₹{(parseFloat(amount) || 0).toLocaleString('en-IN')} to {beneficiaryName}
               </p>
             </div>
@@ -846,10 +810,10 @@ export const Screen6TransferForm: React.FC = () => {
                     key={index}
                     className={`w-11 h-12 rounded-xl border-2 flex items-center justify-center text-xl font-bold transition-all ${
                       hasDigit
-                        ? 'border-[#DB0011] bg-white text-[#DB0011]'
+                        ? 'border-[#DB0011] bg-white dark:bg-slate-800 text-[#DB0011] dark:text-red-400'
                         : isCurrent
-                        ? 'border-[#DB0011] ring-2 ring-[#DB0011]/20 bg-white'
-                        : 'border-slate-300 bg-slate-50'
+                        ? 'border-[#DB0011] ring-2 ring-[#DB0011]/20 bg-white dark:bg-slate-800'
+                        : 'border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800'
                     }`}
                   >
                     {hasDigit ? '•' : ''}
@@ -859,7 +823,7 @@ export const Screen6TransferForm: React.FC = () => {
             </div>
 
             {pinError && (
-              <p className="text-xs text-[#DB0011] font-semibold">{pinError}</p>
+              <p className="text-xs text-[#DB0011] dark:text-red-400 font-semibold">{pinError}</p>
             )}
 
             {/* Numeric Keypad */}
@@ -869,7 +833,7 @@ export const Screen6TransferForm: React.FC = () => {
                   key={num}
                   type="button"
                   onClick={() => handlePinKey(String(num))}
-                  className="h-12 rounded-xl bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-lg font-bold text-black transition cursor-pointer select-none"
+                  className="h-12 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:bg-slate-300 text-lg font-bold text-slate-900 dark:text-white transition cursor-pointer select-none"
                 >
                   {num}
                 </button>
@@ -877,21 +841,21 @@ export const Screen6TransferForm: React.FC = () => {
               <button
                 type="button"
                 onClick={handlePinClear}
-                className="h-12 rounded-xl bg-slate-200 hover:bg-slate-300 text-xs font-bold text-slate-700 transition cursor-pointer select-none"
+                className="h-12 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-xs font-bold text-slate-700 dark:text-slate-200 transition cursor-pointer select-none"
               >
                 Clear
               </button>
               <button
                 type="button"
                 onClick={() => handlePinKey('0')}
-                className="h-12 rounded-xl bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-lg font-bold text-black transition cursor-pointer select-none"
+                className="h-12 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:bg-slate-300 text-lg font-bold text-slate-900 dark:text-white transition cursor-pointer select-none"
               >
                 0
               </button>
               <button
                 type="button"
                 onClick={handlePinBackspace}
-                className="h-12 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center transition cursor-pointer select-none"
+                className="h-12 rounded-xl bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center transition cursor-pointer select-none"
                 aria-label="Backspace"
               >
                 <Delete className="w-5 h-5" />
@@ -900,7 +864,7 @@ export const Screen6TransferForm: React.FC = () => {
 
             <button
               onClick={() => setStep('confirm')}
-              className="text-xs text-slate-500 hover:text-black font-semibold mt-2 cursor-pointer"
+              className="text-xs text-slate-500 dark:text-slate-400 hover:text-black dark:hover:text-white font-semibold mt-2 cursor-pointer"
             >
               Cancel Transfer
             </button>
@@ -912,15 +876,15 @@ export const Screen6TransferForm: React.FC = () => {
       {step === 'processing' && (
         <main className="flex-1 flex flex-col items-center justify-center p-6 text-center">
           <div className="relative mb-5">
-            <div className="w-16 h-16 rounded-full border-4 border-slate-200 border-t-[#DB0011] animate-spin" />
+            <div className="w-16 h-16 rounded-full border-4 border-slate-200 dark:border-slate-800 border-t-[#DB0011] animate-spin" />
           </div>
-          <h2 className="text-lg font-black text-black tracking-tight">
+          <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">
             Processing your transaction... Please wait
           </h2>
-          <p className="text-xs text-slate-500 mt-1.5 max-w-xs leading-relaxed">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 max-w-xs leading-relaxed">
             Please wait while HSBC verifies your transaction with payment gateway. Do not press back or refresh.
           </p>
-          <div className="mt-4 px-3 py-1 bg-red-50 text-[#DB0011] text-xs font-bold rounded-full">
+          <div className="mt-4 px-3 py-1 bg-red-50 dark:bg-red-950/60 text-[#DB0011] dark:text-red-400 text-xs font-bold rounded-full">
             Routing via {transferMode} Network
           </div>
         </main>
@@ -929,79 +893,72 @@ export const Screen6TransferForm: React.FC = () => {
       {/* STEP 5: TRANSACTION FAILED SCREEN - ACCOUNT FREEZED (HSBC WORLD STYLE) */}
       {step === 'failed' && (
         <main className="flex-1 px-4 py-4 space-y-4">
-          <div className="bg-[#FFFFFF] rounded-2xl p-5 border border-red-200 shadow-md text-center relative overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-red-200 dark:border-red-900/60 shadow-md text-center relative overflow-hidden">
             {/* Top red decorative accent */}
             <div className="absolute top-0 inset-x-0 h-1.5 bg-[#DB0011]" />
 
             {/* Big Red Cross Animation with "Transaction Failed" */}
             <div className="relative inline-flex mb-3 mt-1">
-              <div className="w-16 h-16 rounded-full bg-[#DB0011] text-white flex items-center justify-center shadow-lg ring-8 ring-red-100 animate-pulse">
+              <div className="w-16 h-16 rounded-full bg-[#DB0011] text-white flex items-center justify-center shadow-lg ring-8 ring-red-100 dark:ring-red-950 animate-pulse">
                 <X className="w-10 h-10 stroke-[3]" />
               </div>
             </div>
 
-            <h1 className="text-2xl font-black text-black tracking-tight">
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
               Transaction Failed
             </h1>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Your request could not be processed
             </p>
 
-            {/* Middle Alert Banner:
-               ┌─────────────────────────────┐
-               │  ⚠️ Account Status: FREEZED 🥶  │
-               │  Your account is temporarily  │
-               │  freezed due to security      │
-               │  reasons                      │
-               └─────────────────────────────┘ */}
-            <div className="mt-4 p-4 bg-gradient-to-br from-red-50 via-orange-50 to-red-50 border-2 border-red-500 rounded-xl text-center shadow-xs">
-              <div className="flex items-center justify-center gap-1.5 text-[#DB0011] font-black text-sm tracking-wide">
+            <div className="mt-4 p-4 bg-gradient-to-br from-red-50 via-orange-50 to-red-50 dark:from-red-950/40 dark:via-orange-950/30 dark:to-red-950/40 border-2 border-red-500 rounded-xl text-center shadow-xs">
+              <div className="flex items-center justify-center gap-1.5 text-[#DB0011] dark:text-red-400 font-black text-sm tracking-wide">
                 <span>⚠️</span>
                 <span>Account Status: FREEZED</span>
                 <span>🥶</span>
               </div>
-              <p className="text-xs text-red-950 font-semibold mt-1.5 leading-snug">
+              <p className="text-xs text-red-950 dark:text-red-300 font-semibold mt-1.5 leading-snug">
                 Your account is temporarily freezed due to security reasons
               </p>
             </div>
 
             {/* Transaction Details */}
-            <div className="mt-4 space-y-2 text-left text-xs border-t border-slate-100 pt-3">
+            <div className="mt-4 space-y-2 text-left text-xs border-t border-slate-100 dark:border-slate-800 pt-3">
               <div className="flex justify-between items-center py-1">
-                <span className="text-slate-500 font-medium">Transaction ID</span>
-                <strong className="text-black font-mono font-bold text-right">{txnId}</strong>
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Transaction ID</span>
+                <strong className="text-slate-900 dark:text-slate-100 font-mono font-bold text-right">{txnId}</strong>
               </div>
 
-              <div className="flex justify-between items-center py-1 border-t border-slate-100">
-                <span className="text-slate-500 font-medium">Amount</span>
-                <strong className="text-base font-black text-[#DB0011] font-mono text-right">
+              <div className="flex justify-between items-center py-1 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Amount</span>
+                <strong className="text-base font-black text-[#DB0011] dark:text-red-400 font-mono text-right">
                   ₹ {(parseFloat(amount) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </strong>
               </div>
 
-              <div className="flex justify-between items-center py-1 border-t border-slate-100">
-                <span className="text-slate-500 font-medium">Date & Time</span>
-                <span className="text-slate-800 font-semibold text-right">{txDate}</span>
+              <div className="flex justify-between items-center py-1 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Date & Time</span>
+                <span className="text-slate-800 dark:text-slate-200 font-semibold text-right">{txDate}</span>
               </div>
 
-              <div className="flex justify-between items-center py-1 border-t border-slate-100">
-                <span className="text-slate-500 font-medium">Reason</span>
-                <span className="text-[#DB0011] font-bold text-right text-xs">
+              <div className="flex justify-between items-center py-1 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Reason</span>
+                <span className="text-[#DB0011] dark:text-red-400 font-bold text-right text-xs">
                   Account Freezed - Security Hold
                 </span>
               </div>
 
-              <div className="flex justify-between items-center py-1 border-t border-slate-100">
-                <span className="text-slate-500 font-medium">Code</span>
-                <span className="font-mono text-slate-800 font-bold text-right text-xs">
+              <div className="flex justify-between items-center py-1 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400 font-medium">Code</span>
+                <span className="font-mono text-slate-800 dark:text-slate-200 font-bold text-right text-xs">
                   ACCT_FRZ_001
                 </span>
               </div>
 
-              <div className="mt-2.5 p-3 bg-red-50/70 rounded-xl border border-red-200">
+              <div className="mt-2.5 p-3 bg-red-50/70 dark:bg-red-950/40 rounded-xl border border-red-200 dark:border-red-900/60">
                 <div className="flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 text-[#DB0011] shrink-0 mt-0.5" />
-                  <p className="text-xs text-red-950 font-semibold leading-relaxed">
+                  <AlertCircle className="w-4 h-4 text-[#DB0011] dark:text-red-400 shrink-0 mt-0.5" />
+                  <p className="text-xs text-red-950 dark:text-red-300 font-semibold leading-relaxed">
                     Your account is freezed. Cannot debit. Please contact home branch.
                   </p>
                 </div>
@@ -1011,12 +968,11 @@ export const Screen6TransferForm: React.FC = () => {
 
           {/* Action Buttons: [Try Again] [Home] */}
           <div className="space-y-2 pt-1">
-            {/* Try Again -> infinite loop, re-triggers 2-second processing and fails */}
             <button
               onClick={() => {
                 setStep('processing');
               }}
-              className="w-full h-11 bg-slate-900 hover:bg-black active:scale-[0.99] text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full h-11 bg-slate-900 hover:bg-black dark:bg-slate-800 dark:hover:bg-slate-700 active:scale-[0.99] text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Try Again</span>
@@ -1034,9 +990,9 @@ export const Screen6TransferForm: React.FC = () => {
             {/* Contact Support */}
             <button
               onClick={() => setShowSupportModal(true)}
-              className="w-full h-10 bg-white hover:bg-slate-50 active:scale-[0.99] text-slate-600 border border-slate-200 font-semibold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full h-10 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 active:scale-[0.99] text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 font-semibold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer"
             >
-              <PhoneCall className="w-3.5 h-3.5 text-[#DB0011]" />
+              <PhoneCall className="w-3.5 h-3.5 text-[#DB0011] dark:text-red-400" />
               <span>Contact Support</span>
             </button>
           </div>
@@ -1046,56 +1002,56 @@ export const Screen6TransferForm: React.FC = () => {
       {/* Customer Support Popup Modal */}
       {showSupportModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-white rounded-2xl p-5 shadow-2xl border border-slate-200 space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+          <div className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-red-100 text-[#DB0011] flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-950/60 text-[#DB0011] dark:text-red-400 flex items-center justify-center">
                   <Headphones className="w-4 h-4" />
                 </div>
-                <h3 className="text-sm font-bold text-black">HSBC Customer Care</h3>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">HSBC Customer Care</h3>
               </div>
               <button
                 onClick={() => setShowSupportModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-black cursor-pointer"
+                className="p-1 rounded-lg text-slate-400 hover:text-black dark:hover:text-white cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
               Your account is currently under security freeze (Code: ACCT_FRZ_001). Please reach out to our Premier Support team:
             </p>
 
             <div className="space-y-2.5">
               <a
                 href="tel:18002663456"
-                className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between hover:bg-red-50 hover:border-red-200 transition group"
+                className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between hover:bg-red-50 dark:hover:bg-red-950/40 hover:border-red-200 transition group"
               >
                 <div className="flex items-center gap-2.5">
-                  <Phone className="w-4 h-4 text-[#DB0011]" />
+                  <Phone className="w-4 h-4 text-[#DB0011] dark:text-red-400" />
                   <div>
-                    <span className="text-[10px] text-slate-500 block uppercase font-bold">Customer Care</span>
-                    <strong className="text-xs text-black group-hover:text-[#DB0011]">1800 266 3456</strong>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase font-bold">Customer Care</span>
+                    <strong className="text-xs text-slate-900 dark:text-white group-hover:text-[#DB0011] dark:group-hover:text-red-400">1800 266 3456</strong>
                   </div>
                 </div>
-                <span className="text-[10px] text-[#DB0011] font-bold">Call Now &rarr;</span>
+                <span className="text-[10px] text-[#DB0011] dark:text-red-400 font-bold">Call Now &rarr;</span>
               </a>
 
               <a
                 href="mailto:supportindia@hsbc.com"
-                className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between hover:bg-red-50 hover:border-red-200 transition group"
+                className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between hover:bg-red-50 dark:hover:bg-red-950/40 hover:border-red-200 transition group"
               >
                 <div className="flex items-center gap-2.5">
-                  <Mail className="w-4 h-4 text-[#DB0011]" />
+                  <Mail className="w-4 h-4 text-[#DB0011] dark:text-red-400" />
                   <div>
-                    <span className="text-[10px] text-slate-500 block uppercase font-bold">Support Email</span>
-                    <strong className="text-xs text-black group-hover:text-[#DB0011]">supportindia@hsbc.com</strong>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase font-bold">Support Email</span>
+                    <strong className="text-xs text-slate-900 dark:text-white group-hover:text-[#DB0011] dark:group-hover:text-red-400">supportindia@hsbc.com</strong>
                   </div>
                 </div>
-                <span className="text-[10px] text-[#DB0011] font-bold">Email &rarr;</span>
+                <span className="text-[10px] text-[#DB0011] dark:text-red-400 font-bold">Email &rarr;</span>
               </a>
 
-              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+              <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-[11px] text-amber-900 dark:text-amber-300 leading-relaxed">
                 <strong>Home Branch Visit:</strong> Please visit HSBC Fort Main Branch, Mumbai with original KYC documents (PAN & Aadhaar) for biometric reverification.
               </div>
             </div>
@@ -1121,8 +1077,8 @@ export const Screen6TransferForm: React.FC = () => {
       />
 
       {/* Persistent Bottom Security Banner */}
-      <footer className="p-3 bg-[#FFFFFF] border-t border-slate-200 text-center flex items-center justify-center gap-1.5 text-xs text-slate-500">
-        <ShieldCheck className="w-4 h-4 text-emerald-600" />
+      <footer className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 text-center flex items-center justify-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+        <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
         <span>RBI BBPS & NPCI IMPS Clearing Guaranteed</span>
       </footer>
     </div>

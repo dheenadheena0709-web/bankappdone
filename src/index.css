@@ -1,20 +1,78 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+
 @layer base {
+  html {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    touch-action: manipulation;
+  }
+
   body {
+    width: 100%;
+    max-width: 100%;
+    min-height: 100%;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    -webkit-overflow-scrolling: touch;
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+
+  #root {
+    width: 100%;
+    max-width: 100%;
+    min-height: 100%;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  img, svg, video, canvas, audio, iframe, embed, object {
+    max-width: 100%;
+    height: auto;
   }
 }
 
-/* Authentic Passbook ruled paper background */
+/* Authentic Passbook ruled paper background (Light & Dark) */
 .ledger-paper-lines {
   background-color: #fbfcfe;
   background-image: linear-gradient(rgba(186, 215, 248, 0.45) 1px, transparent 1px);
   background-size: 100% 32px;
 }
 
+.dark .ledger-paper-lines {
+  background-color: #0f172a;
+  background-image: linear-gradient(rgba(51, 65, 85, 0.45) 1px, transparent 1px);
+  background-size: 100% 32px;
+}
+
 .ledger-margin-line {
   border-left: 2px double rgba(220, 38, 38, 0.35);
+}
+
+.dark .ledger-margin-line {
+  border-left: 2px double rgba(239, 68, 68, 0.4);
 }
 
 .font-ledger {
@@ -70,3 +128,382 @@
 .animate-slide-up {
   animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* Premium Skeleton Shimmer Animations */
+@keyframes shimmerWave {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.22) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmerWave 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+.animate-shimmer-dark {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-shimmer-dark::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.16) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmerWave 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+/* Subtle Haptic-Like Bounce Keyframe Animation */
+@keyframes hapticBounce {
+  0% {
+    transform: scale(1);
+  }
+  28% {
+    transform: scale(0.85);
+  }
+  58% {
+    transform: scale(1.18);
+  }
+  78% {
+    transform: scale(0.96);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-haptic-bounce {
+  animation: hapticBounce 0.42s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* =========================================================================
+   LUXURY WHITE-GOLD BALANCE SHIMMER ANIMATION (HSBC Kinetic Premier Theme)
+   - 1.2s active diagonal sweep
+   - 3.0s total loop cycle (1.8s hold/rest between sweeps)
+   - White-gold radiant band with trailing sparkle glints
+   ========================================================================= */
+
+@keyframes luxuryGoldSweep {
+  0% {
+    transform: translateX(-150%) skewX(-24deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  38% {
+    opacity: 1;
+  }
+  42% {
+    transform: translateX(170%) skewX(-24deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(170%) skewX(-24deg);
+    opacity: 0;
+  }
+}
+
+.luxury-sweep-layer {
+  overflow: hidden;
+  mix-blend-mode: color-dodge;
+}
+
+.luxury-beam {
+  width: 100%;
+  height: 100%;
+  transform: translateX(-150%) skewX(-24deg);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 235, 143, 0.15) 20%,
+    rgba(255, 255, 255, 0.85) 48%,
+    rgba(255, 223, 115, 0.95) 52%,
+    rgba(255, 245, 215, 0.4) 65%,
+    transparent 100%
+  );
+  filter: blur(1.5px);
+  animation: luxuryGoldSweep 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Trailing Sparkle Glints (Synchronized to 3.0s cycle) */
+@keyframes sparklePulse1 {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  8% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  16% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+  24% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+@keyframes sparklePulse2 {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  18% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  26% {
+    opacity: 1;
+    transform: scale(1.4);
+  }
+  34% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+@keyframes sparklePulse3 {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  28% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  36% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  44% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+}
+
+.sparkle-particle {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.sparkle-1 {
+  animation: sparklePulse1 3s ease-in-out infinite;
+}
+
+.sparkle-2 {
+  animation: sparklePulse2 3s ease-in-out infinite;
+}
+
+.sparkle-3 {
+  animation: sparklePulse3 3s ease-in-out infinite;
+}
+
+/* =========================================================================
+   IOS NATIVE TAB SLIDE TRANSITION ANIMATIONS (HSBC Kinetic)
+   - Duration: 350ms
+   - Easing: easeOutCubic (cubic-bezier(0.33, 1, 0.68, 1))
+   - Zero hard-cut: Seamless parallax slide
+   ========================================================================= */
+
+@keyframes iosSlideInFromRight {
+  0% {
+    transform: translate3d(100%, 0, 0);
+    opacity: 0.95;
+    box-shadow: -14px 0 32px rgba(0, 0, 0, 0.16);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+    box-shadow: none;
+  }
+}
+
+@keyframes iosSlideOutToLeft {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(-26%, 0, 0);
+    opacity: 0.85;
+  }
+}
+
+@keyframes iosSlideInFromLeft {
+  0% {
+    transform: translate3d(-26%, 0, 0);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes iosSlideOutToRight {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+    box-shadow: -14px 0 32px rgba(0, 0, 0, 0.16);
+  }
+  100% {
+    transform: translate3d(100%, 0, 0);
+    opacity: 0.95;
+    box-shadow: none;
+  }
+}
+
+.tab-slide-pane-in-right {
+  animation: iosSlideInFromRight 350ms cubic-bezier(0.33, 1, 0.68, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.tab-slide-pane-out-left {
+  animation: iosSlideOutToLeft 350ms cubic-bezier(0.33, 1, 0.68, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.tab-slide-pane-in-left {
+  animation: iosSlideInFromLeft 350ms cubic-bezier(0.33, 1, 0.68, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.tab-slide-pane-out-right {
+  animation: iosSlideOutToRight 350ms cubic-bezier(0.33, 1, 0.68, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* Custom Top Header Section Styling - Responsive Flexbox */
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.welcome-section {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.welcome-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.user-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 15px;
+  font-weight: 700;
+  max-width: 100%;
+}
+
+.premier-badge {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+/* =========================================================================
+   MEDIA QUERIES FOR 320PX TO 480PX MOBILE SCREENS (5.0" to 6.8" Android / Median WebView)
+   ========================================================================= */
+
+/* Extra small devices: 320px - 360px (Compact 5" Android phones) */
+@media screen and (max-width: 360px) {
+  .header-container {
+    padding: 8px 10px !important;
+    gap: 6px !important;
+  }
+  .user-name {
+    font-size: 13px !important;
+  }
+  .welcome-line {
+    gap: 4px !important;
+  }
+  .action-buttons {
+    gap: 4px !important;
+  }
+  .action-buttons button {
+    width: 28px !important;
+    height: 28px !important;
+  }
+  .action-buttons button svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
+}
+
+/* Standard Mobile Screens: 361px - 480px (5.5" to 6.8" Android phones) */
+@media screen and (min-width: 361px) and (max-width: 480px) {
+  .header-container {
+    padding: 12px 14px !important;
+    gap: 8px !important;
+  }
+  .user-name {
+    font-size: 15px !important;
+  }
+  .action-buttons {
+    gap: 6px !important;
+  }
+}
+
+/* Median WebView APK Safe-Area & Touch Target Optimizations */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-top-padding {
+    padding-top: max(12px, env(safe-area-inset-top, 0px));
+  }
+  .safe-bottom-padding {
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Prevent any accidental horizontal scrollbar or bounce on Android WebView */
+html, body {
+  overscroll-behavior-x: none;
+}
+

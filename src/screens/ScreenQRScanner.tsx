@@ -33,6 +33,12 @@ export const ScreenQRScanner: React.FC = () => {
   const [scannedResult, setScannedResult] = useState<string | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
   const [isProcessingImage, setIsProcessingImage] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = useCallback((msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  }, []);
 
   // Sound effect for successful scan using Web Audio API
   const playBeepSound = () => {
@@ -100,6 +106,20 @@ export const ScreenQRScanner: React.FC = () => {
       return;
     }
 
+    // Query camera permission status beforehand if supported
+    if (typeof navigator !== 'undefined' && navigator.permissions?.query) {
+      try {
+        const permStatus = await navigator.permissions.query({ name: 'camera' as any });
+        if (permStatus.state === 'denied') {
+          setPermissionDenied(true);
+          setErrorMessage('Camera access was denied. You can allow camera permission in browser settings or upload a QR image.');
+          return;
+        }
+      } catch {
+        // Permissions query might throw on unsupported browsers, safe to ignore
+      }
+    }
+
     try {
       // Try back camera first
       let stream: MediaStream;
@@ -112,7 +132,7 @@ export const ScreenQRScanner: React.FC = () => {
           },
           audio: false,
         });
-      } catch (err: any) {
+      } catch {
         // Fallback to any camera if environment camera is not available
         stream = await navigator.mediaDevices.getUserMedia({
           video: true,
@@ -141,14 +161,18 @@ export const ScreenQRScanner: React.FC = () => {
         setCameraActive(true);
       }
     } catch (err: any) {
-      console.error('Camera access error:', err);
+      // Camera permission denial or hardware absence is an expected flow in iframe/desktop environments
+      console.warn('Camera access unavailable or permission not granted:', err?.name || err?.message || 'Access denied');
       if (
         err.name === 'NotAllowedError' ||
         err.name === 'PermissionDeniedError' ||
         err.name === 'SecurityError'
       ) {
         setPermissionDenied(true);
-        setErrorMessage('Camera permission needed - Please allow camera in settings');
+        setErrorMessage('Camera access was denied. You can allow camera permission in browser settings, upload a QR code image, or use a sample QR.');
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        setPermissionDenied(false);
+        setErrorMessage('No camera device detected on this system. You can upload a QR image or test with a sample QR.');
       } else {
         setErrorMessage(err.message || 'Unable to access camera feed.');
       }
@@ -255,7 +279,7 @@ export const ScreenQRScanner: React.FC = () => {
             setScannedResult(code.data);
             stopCamera();
           } else {
-            alert('No valid QR code found in this image. Please select a clearer photo.');
+            showToast('No valid QR code found in this image. Please select a clearer photo or try sample QR.');
           }
         } else {
           setIsProcessingImage(false);
@@ -364,10 +388,10 @@ export const ScreenQRScanner: React.FC = () => {
 
         {/* Center Cutout Row */}
         <div className="w-full flex items-center justify-center">
-          <div className="flex-1 h-64 sm:h-72 bg-black/70" />
+          <div className="flex-1 h-[240px] xs:h-64 sm:h-72 bg-black/70" />
 
           {/* VIEW FINDER BOX (Google Pay / PhonePe style) */}
-          <div className="relative w-64 h-64 sm:w-72 sm:h-72 shrink-0">
+          <div className="relative w-[240px] h-[240px] xs:w-64 xs:h-64 sm:w-72 sm:h-72 max-w-[78vw] max-h-[78vw] shrink-0">
             {/* Corner Borders: White 4px brackets */}
             {/* Top-Left Corner */}
             <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-white rounded-tl-xl pointer-events-none" />
@@ -384,7 +408,7 @@ export const ScreenQRScanner: React.FC = () => {
             )}
           </div>
 
-          <div className="flex-1 h-64 sm:h-72 bg-black/70" />
+          <div className="flex-1 h-[240px] xs:h-64 sm:h-72 bg-black/70" />
         </div>
 
         {/* Bottom Dark Bar */}
@@ -392,7 +416,7 @@ export const ScreenQRScanner: React.FC = () => {
       </div>
 
       {/* TOP BAR: Controls & Header */}
-      <header className="relative z-20 px-4 pt-4 pb-3 flex items-center justify-between bg-gradient-to-b from-black/80 via-black/40 to-transparent">
+      <header className="relative z-20 px-4 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-3 flex items-center justify-between bg-gradient-to-b from-black/80 via-black/40 to-transparent">
         <button
           onClick={() => navigate(-1)}
           className="w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 active:scale-95 text-white flex items-center justify-center transition backdrop-blur-md cursor-pointer border border-white/20"
@@ -519,19 +543,19 @@ export const ScreenQRScanner: React.FC = () => {
 
       {/* SUCCESS MODAL / SHEET: When QR is Detected */}
       {scannedResult && (
-        <div className="absolute inset-x-0 bottom-0 z-40 bg-[#FFFFFF] text-black rounded-t-3xl shadow-2xl p-5 border-t border-slate-200 animate-slide-up">
-          <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-3" />
+        <div className="absolute inset-x-0 bottom-0 z-40 bg-white dark:bg-slate-900 text-black dark:text-white rounded-t-3xl shadow-2xl p-5 border-t border-slate-200 dark:border-slate-800 animate-slide-up transition-colors duration-200">
+          <div className="w-10 h-1 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto mb-3" />
 
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
                 <CheckCircle2 className="w-5 h-5 stroke-[2.5]" />
               </div>
               <div>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
                   {upiInfo ? 'UPI QR Detected' : 'QR Code Scanned'}
                 </span>
-                <h3 className="text-sm font-bold text-slate-900 mt-1 truncate max-w-[200px]">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white mt-1 truncate max-w-[200px]">
                   {upiInfo?.name || 'Scanned Payee'}
                 </h3>
               </div>
@@ -542,7 +566,7 @@ export const ScreenQRScanner: React.FC = () => {
                 setScannedResult(null);
                 startCamera();
               }}
-              className="text-slate-400 hover:text-black p-1 transition cursor-pointer"
+              className="text-slate-400 hover:text-black dark:hover:text-white p-1 transition cursor-pointer"
               title="Rescan"
             >
               <RefreshCw className="w-4 h-4" />
@@ -550,16 +574,16 @@ export const ScreenQRScanner: React.FC = () => {
           </div>
 
           {/* Result Content Card */}
-          <div className="mt-3.5 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1.5">
+          <div className="mt-3.5 p-3 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 text-xs space-y-1.5">
             {upiInfo ? (
               <>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500 font-medium">UPI ID</span>
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">UPI ID</span>
                   <div className="flex items-center gap-1.5">
-                    <span className="font-mono font-bold text-slate-900">{upiInfo.upiId}</span>
+                    <span className="font-mono font-bold text-slate-900 dark:text-slate-100">{upiInfo.upiId}</span>
                     <button
                       onClick={() => handleCopy(upiInfo.upiId)}
-                      className="text-slate-400 hover:text-black p-0.5 cursor-pointer"
+                      className="text-slate-400 hover:text-black dark:hover:text-white p-0.5 cursor-pointer"
                       title="Copy UPI ID"
                     >
                       <Copy className="w-3.5 h-3.5" />
@@ -568,9 +592,9 @@ export const ScreenQRScanner: React.FC = () => {
                 </div>
 
                 {upiInfo.amount && (
-                  <div className="flex justify-between items-center pt-1 border-t border-slate-200/60">
-                    <span className="text-slate-500 font-medium">Requested Amount</span>
-                    <strong className="text-sm font-black text-[#DB0011]">
+                  <div className="flex justify-between items-center pt-1 border-t border-slate-200/60 dark:border-slate-700">
+                    <span className="text-slate-500 dark:text-slate-400 font-medium">Requested Amount</span>
+                    <strong className="text-sm font-black text-[#DB0011] dark:text-red-400">
                       ₹{parseFloat(upiInfo.amount).toLocaleString('en-IN')}
                     </strong>
                   </div>
@@ -578,8 +602,8 @@ export const ScreenQRScanner: React.FC = () => {
               </>
             ) : (
               <div>
-                <span className="text-slate-500 font-medium block mb-1">Decoded Payload</span>
-                <div className="p-2 bg-white rounded border border-slate-200 font-mono text-[11px] break-all max-h-20 overflow-y-auto text-slate-800">
+                <span className="text-slate-500 dark:text-slate-400 font-medium block mb-1">Decoded Payload</span>
+                <div className="p-2 bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700 font-mono text-[11px] break-all max-h-20 overflow-y-auto text-slate-800 dark:text-slate-200">
                   {scannedResult}
                 </div>
               </div>
@@ -587,7 +611,7 @@ export const ScreenQRScanner: React.FC = () => {
           </div>
 
           {copied && (
-            <p className="text-center text-[11px] text-emerald-600 font-semibold mt-1.5">
+            <p className="text-center text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1.5">
               Copied to clipboard!
             </p>
           )}
@@ -599,7 +623,7 @@ export const ScreenQRScanner: React.FC = () => {
                 setScannedResult(null);
                 startCamera();
               }}
-              className="flex-1 h-11 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition cursor-pointer active:scale-[0.98]"
+              className="flex-1 h-11 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition cursor-pointer active:scale-[0.98]"
             >
               Scan Again
             </button>
@@ -612,6 +636,13 @@ export const ScreenQRScanner: React.FC = () => {
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
+        </div>
+      )}
+      {/* Floating Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-2xl animate-fade-in flex items-center gap-2 border border-white/20 whitespace-nowrap pointer-events-none">
+          <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+          <span>{toastMessage}</span>
         </div>
       )}
     </div>

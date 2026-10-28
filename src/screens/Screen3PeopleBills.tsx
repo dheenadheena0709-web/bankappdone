@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BottomNav } from '../components/BottomNav';
 import { PayeeContact } from '../constants/mockData';
+import { useBank } from '../context/BankContext';
+import { CORPORATE_PAYEES } from '../constants/corporateData';
 import {
   Smartphone,
   PhoneCall,
@@ -38,10 +40,11 @@ import { AccountFrozenModal } from '../components/AccountFrozenModal';
 
 export const Screen3PeopleBills: React.FC = () => {
   const navigate = useNavigate();
+  const { userAccount } = useBank();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showFreezePopup, setShowFreezePopup] = useState(false);
 
-  // FLOW A: PEOPLE & ACCOUNTS (Independent flow)
+  // FLOW A: PEOPLE & ACCOUNTS (Empty by default - no pre-seeded payee details)
   const [payees, setPayees] = useState<PayeeContact[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [payeeName, setPayeeName] = useState('');
@@ -270,14 +273,14 @@ export const Screen3PeopleBills: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col justify-between bg-[#F5F5F5] min-h-[740px] text-black">
+    <div className="flex-1 flex flex-col justify-between bg-[#F5F5F5] dark:bg-slate-950 min-h-screen min-h-[100dvh] text-slate-900 dark:text-slate-100 pb-28 transition-colors duration-200 overflow-x-hidden w-full max-w-full">
       {/* Top Red Header #DB0011 "Move Money" */}
-      <header className="bg-[#DB0011] text-white px-4 pt-3 pb-5 shadow-sm">
+      <header className="bg-[#DB0011] dark:bg-slate-900 text-white px-4 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-5 shadow-sm border-b dark:border-slate-800 transition-colors duration-200 w-full">
         <div className="flex items-center justify-between mb-1">
           <h1 className="text-xl font-bold tracking-tight">Move Money</h1>
           <button
             onClick={() => navigate('/pay-and-transfer')}
-            className="text-xs font-bold text-white/90 hover:text-white flex items-center gap-0.5 cursor-pointer bg-white/10 px-2 py-0.5 rounded-md"
+            className="text-xs font-bold text-white/90 hover:text-white flex items-center gap-0.5 cursor-pointer bg-white/10 dark:bg-slate-800 px-2 py-0.5 rounded-md"
           >
             <span>International</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -291,26 +294,26 @@ export const Screen3PeopleBills: React.FC = () => {
         {/* FLOW A: SECTION 1: PEOPLE & ACCOUNTS */}
         <div>
           <div className="flex items-center justify-between mb-2 px-1">
-            <h2 className="text-xs font-bold text-black uppercase tracking-wider">
+            <h2 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
               People & Accounts
             </h2>
             <button
               onClick={() => setShowAddModal(true)}
-              className="text-xs font-bold text-[#DB0011] hover:underline flex items-center gap-0.5 cursor-pointer"
+              className="text-xs font-bold text-[#DB0011] dark:text-red-400 hover:underline flex items-center gap-0.5 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>+ Add payee</span>
             </button>
           </div>
 
-          <div className="bg-[#FFFFFF] p-4 rounded-xl border border-slate-200/80 shadow-sm min-h-[140px] flex flex-col justify-center">
+          <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm min-h-[140px] flex flex-col justify-center">
             {payees.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-4 text-center">
-                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+                <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-2">
                   <UserX className="w-6 h-6 stroke-[1.5]" />
                 </div>
-                <h3 className="text-xs font-bold text-slate-800">No payees added</h3>
-                <p className="text-[11px] text-slate-500 max-w-xs mt-0.5">
+                <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200">No payees added</h3>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 max-w-xs mt-0.5">
                   You have not added any beneficiaries or payees yet.
                 </p>
                 <button
@@ -322,7 +325,7 @@ export const Screen3PeopleBills: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-4 gap-y-3 gap-x-2">
+              <div className="grid grid-cols-4 gap-y-3.5 gap-x-2">
                 {payees.map((contact) => (
                   <button
                     key={contact.id}
@@ -331,17 +334,17 @@ export const Screen3PeopleBills: React.FC = () => {
                         state: { payeeName: contact.name, accNo: contact.accNumber },
                       })
                     }
-                    className="flex flex-col items-center group cursor-pointer"
+                    className="flex flex-col items-center group cursor-pointer text-center"
                     title={`Transfer to ${contact.name}`}
                   >
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm shadow-xs transition-transform group-hover:scale-105 group-active:scale-95 bg-slate-100 text-black border border-slate-300">
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-xs shadow-xs transition-transform group-hover:scale-105 group-active:scale-95 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-700">
                       {contact.initials}
                     </div>
-                    <span className="text-[11px] font-bold text-black mt-1.5 truncate max-w-[68px] text-center">
-                      {contact.name.split(' ')[0]}
+                    <span className="text-[10px] font-bold text-slate-800 dark:text-slate-100 mt-1.5 leading-tight line-clamp-2 max-w-[72px] text-center" title={contact.name}>
+                      {contact.name.replace(/ Pvt Ltd| Ltd| Solutions| Systems/gi, '')}
                     </span>
-                    <span className="text-[9px] text-slate-500 font-medium">
-                      {contact.bank.split(' ')[0]}
+                    <span className="text-[9px] text-slate-400 dark:text-slate-500 font-medium truncate max-w-[70px]">
+                      {contact.bank.replace(/ Bank Ltd| Bank/gi, '')}
                     </span>
                   </button>
                 ))}
@@ -353,29 +356,29 @@ export const Screen3PeopleBills: React.FC = () => {
         {/* FLOW B: SECTION 2: BILL PAYMENTS (ALL 8 TILES INDEPENDENT) */}
         <div>
           <div className="flex items-center justify-between mb-2 px-1">
-            <h2 className="text-xs font-bold text-black uppercase tracking-wider">
+            <h2 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
               Bill Payments
             </h2>
-            <span className="text-[10px] text-slate-500 font-semibold">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold">
               BBPS Assured
             </span>
           </div>
 
-          <div className="grid grid-cols-4 gap-2 bg-[#FFFFFF] p-3.5 rounded-xl border border-slate-200/80 shadow-sm">
+          <div className="grid grid-cols-4 gap-2 bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
             {mainBillServices.map((service) => {
               const IconComp = service.icon;
               return (
                 <button
                   key={service.id}
                   onClick={() => openBillModal(service.id)}
-                  className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 active:scale-95 transition cursor-pointer group text-center"
+                  className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 active:scale-95 transition cursor-pointer group text-center"
                 >
                   <div
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center mb-1.5 transition-transform group-hover:scale-105 ${service.color}`}
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center mb-1.5 transition-transform group-hover:scale-105 ${service.color} dark:bg-slate-800 dark:text-slate-200`}
                   >
                     <IconComp className="w-5 h-5" />
                   </div>
-                  <span className="text-[11px] font-bold text-black leading-tight">
+                  <span className="text-[11px] font-bold text-slate-900 dark:text-slate-100 leading-tight">
                     {service.name}
                   </span>
                 </button>
@@ -387,15 +390,15 @@ export const Screen3PeopleBills: React.FC = () => {
         {/* FLOW A QUICK LINK TO TRANSFER */}
         <div
           onClick={() => navigate('/transfer')}
-          className="bg-white rounded-xl border border-slate-200/80 p-3.5 flex items-center justify-between shadow-sm cursor-pointer hover:border-[#DB0011] transition group"
+          className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 p-3.5 flex items-center justify-between shadow-sm cursor-pointer hover:border-[#DB0011] dark:hover:border-red-400 transition group"
         >
           <div>
-            <h4 className="text-xs font-bold text-black">New Account Transfer</h4>
-            <p className="text-[11px] text-slate-500">
+            <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">New Account Transfer</h4>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
               Send money directly to any IFSC / Bank account
             </p>
           </div>
-          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#DB0011] group-hover:translate-x-0.5 transition" />
+          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#DB0011] dark:group-hover:text-red-400 group-hover:translate-x-0.5 transition" />
         </div>
       </main>
 
@@ -1071,9 +1074,6 @@ export const Screen3PeopleBills: React.FC = () => {
                     <option value="HSBC Premier Savings - ••••2010">
                       HSBC Premier Savings - ••••2010 (Bal: ₹12,00,00,00,000.00)
                     </option>
-                    <option value="HSBC Current Business Account - ••••8812">
-                      HSBC Current Business - ••••8812 (Bal: ₹50,00,000.00)
-                    </option>
                   </select>
                 </div>
 
@@ -1306,9 +1306,6 @@ export const Screen3PeopleBills: React.FC = () => {
         onClose={() => setShowFreezePopup(false)}
         onSupportClick={() => navigate('/profile')}
       />
-
-      {/* Bottom Navigation */}
-      <BottomNav activeTabOverride="move-money" />
     </div>
   );
 };

@@ -60,34 +60,34 @@ export const AccountFrozenModal: React.FC<AccountFrozenModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl border border-red-200 text-center relative">
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 xs:p-4 animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-xs xs:max-w-sm overflow-hidden shadow-2xl border border-red-200 dark:border-red-900/40 text-center relative transition-colors duration-200">
         {/* Top Red Bar */}
         <div className="h-1.5 bg-[#DB0011] w-full" />
 
         <div className="p-6 space-y-4">
           {/* Animated Red Icon */}
-          <div className="w-16 h-16 rounded-full bg-red-100 text-[#DB0011] flex items-center justify-center mx-auto shadow-inner ring-8 ring-red-50">
+          <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-950/60 text-[#DB0011] dark:text-red-400 flex items-center justify-center mx-auto shadow-inner ring-8 ring-red-50 dark:ring-red-950/30">
             <Lock className="w-8 h-8 stroke-[2.5]" />
           </div>
 
           <div>
-            <h3 className="text-xl font-black text-black tracking-tight">
+            <h3 className="text-xl font-black text-black dark:text-white tracking-tight">
               Account Frozen
             </h3>
-            <p className="text-xs text-slate-600 mt-2 leading-relaxed px-2">
+            <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed px-2">
               Your account has been frozen. Transaction failed. Please visit branch.
             </p>
           </div>
 
           {/* Security Alert Badge */}
-          <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-left flex items-start gap-2.5">
-            <AlertCircle className="w-4 h-4 text-[#DB0011] shrink-0 mt-0.5" />
+          <div className="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-xl text-left flex items-start gap-2.5">
+            <AlertCircle className="w-4 h-4 text-[#DB0011] dark:text-red-400 shrink-0 mt-0.5" />
             <div className="text-[11px] leading-tight">
-              <span className="font-bold text-[#DB0011] block">
+              <span className="font-bold text-[#DB0011] dark:text-red-400 block">
                 Security Hold · Code: ACCT_FRZ_001
               </span>
-              <span className="text-slate-600 mt-0.5 block">
+              <span className="text-slate-600 dark:text-slate-300 mt-0.5 block">
                 Debit transactions are currently disabled for this account.
               </span>
             </div>
@@ -105,9 +105,9 @@ export const AccountFrozenModal: React.FC<AccountFrozenModalProps> = ({
             {onSupportClick && (
               <button
                 onClick={onSupportClick}
-                className="w-full h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full h-10 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <Phone className="w-3.5 h-3.5 text-[#DB0011]" />
+                <Phone className="w-3.5 h-3.5 text-[#DB0011] dark:text-red-400" />
                 <span>Contact Branch / Support</span>
               </button>
             )}

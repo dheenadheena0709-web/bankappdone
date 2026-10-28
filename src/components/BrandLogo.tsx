@@ -23,7 +23,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   };
 
   const currentSize = sizeMap[size];
-  const redColor = '#DB0011';
+  const redColor = '#E30613';
   const whiteColor = '#FFFFFF';
 
   return (

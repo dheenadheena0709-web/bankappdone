@@ -1,0 +1,46 @@
+=====================================================
+HSBC BANK - AI STUDIO EXPORT SPECIFICATION & STATUS
+=====================================================
+
+Project name: HSBC Bank
+Users: Sirajudeen included
+Secret Corporate User: SP Live India Private Limited (090807) included
+Total users: 1 standard personal account + 1 secret corporate business account
+Export method: Download as ZIP from AI Studio
+Note: Upload this ZIP to new account to continue with 50 users
+
+-----------------------------------------------------
+STANDARD USER PROFILE (NORMAL LOGIN):
+-----------------------------------------------------
+User 1:
+- Name: Sirajudeen Mohamed Sharif
+- Account Number: 002197782010
+- Account Type: Premier Savings Account
+- Password: Password@123
+- Mobile: 9677513691
+- PAN: FUCPS1419A
+- Balance: ₹12,00,00,00,000 (Premier)
+- Status: Normal Active User
+
+-----------------------------------------------------
+SECRET CORPORATE BUSINESS ACCOUNT (PIN / PASS: 090807):
+-----------------------------------------------------
+- Company Name: SP Live India Private Limited
+- Account Number: 48290615734
+- Account Type: Premium Current Account - Business Banking
+- Balance: ₹96,12,88,165.54 (with exact paise)
+- IFSC Code: HSBC0110005
+- MICR Code: 110039005
+- Email ID: spliveindia@spliveindia.co.in
+- Mobile Number: Not Linked
+- PAN Number: AAJCS1234F
+- CIN: U72200DL2018PTC334812
+- GSTIN: 07AAJCS1234F1Z8
+- Transactions: 40 Corporate Transactions (all > ₹1 Crore)
+- Interface: HSBC Corporate Banking with Corporate Account Badges & Company Profile
+
+-----------------------------------------------------
+DELETED TEST USERS:
+-----------------------------------------------------
+- Account 425581 - Completely deleted & blocked
+- Kumar (PIN: 112233) - Completely deleted & blocked

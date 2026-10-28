@@ -55,9 +55,9 @@ export const Screen4Electricity: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col justify-between bg-[#F5F5F5] min-h-[740px] text-black">
+    <div className="flex-1 flex flex-col justify-between bg-[#F5F5F5] dark:bg-slate-950 min-h-screen min-h-[100dvh] text-slate-900 dark:text-slate-100 transition-colors duration-200 overflow-x-hidden w-full max-w-full pb-24">
       {/* Top Header Background: #DB0011 */}
-      <header className="bg-[#DB0011] text-white px-4 pt-3 pb-5 shadow-sm">
+      <header className="bg-[#DB0011] dark:bg-slate-900 text-white px-4 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-5 shadow-sm border-b dark:border-slate-800 transition-colors duration-200 w-full">
         <div className="flex items-center gap-3 mb-3">
           <button
             onClick={() => {
@@ -84,7 +84,7 @@ export const Screen4Electricity: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by electricity board or operator"
-              className="w-full h-11 pl-9 pr-3 rounded-lg bg-white text-black placeholder-slate-400 text-xs font-medium border border-slate-200 focus:ring-2 focus:ring-white outline-none shadow-xs"
+              className="w-full h-11 pl-9 pr-3 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 text-xs font-medium border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-white outline-none shadow-xs"
             />
           </div>
         )}
@@ -96,29 +96,29 @@ export const Screen4Electricity: React.FC = () => {
         {step === 'input' && (
           <>
             {/* FRESH ACCOUNT STATUS BANNER */}
-            <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-sm flex items-center justify-between text-xs">
-              <span className="text-slate-500 font-medium">Account Status</span>
-              <span className="text-[11px] font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200">
+            <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between text-xs">
+              <span className="text-slate-500 dark:text-slate-400 font-medium">Account Status</span>
+              <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700">
                 No recent / No outstanding - fresh account
               </span>
             </div>
 
             {/* SECTION 1: EMPTY FORM FOR ELECTRICITY BILL */}
-            <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
-              <h2 className="text-xs font-bold text-black uppercase tracking-wider mb-3">
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-sm">
+              <h2 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider mb-3">
                 Pay Electricity Bill
               </h2>
 
               <form onSubmit={handleProceedToConfirm} className="space-y-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                     State / Electricity Board *
                   </label>
                   <select
                     value={selectedBiller}
                     required
                     onChange={(e) => setSelectedBiller(e.target.value)}
-                    className="w-full h-11 px-3 rounded-lg border border-slate-300 text-xs text-black focus:outline-none focus:ring-1 focus:ring-[#DB0011] bg-white"
+                    className="w-full h-11 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#DB0011] bg-white dark:bg-slate-800"
                   >
                     <option value="">Select Electricity Board / State</option>
                     {ELECTRICITY_BILLERS.map((b) => (
@@ -130,7 +130,7 @@ export const Screen4Electricity: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Consumer Number / Account ID *
                   </label>
                   <input
@@ -139,7 +139,7 @@ export const Screen4Electricity: React.FC = () => {
                     placeholder="Enter Consumer Number"
                     value={consumerNumber}
                     onChange={(e) => setConsumerNumber(e.target.value)}
-                    className="w-full h-11 px-3 rounded-lg border border-slate-300 text-xs font-mono text-black focus:outline-none focus:ring-1 focus:ring-[#DB0011]"
+                    className="w-full h-11 px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-[#DB0011]"
                   />
                 </div>
 
@@ -147,19 +147,19 @@ export const Screen4Electricity: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleFetchBill}
-                    className="w-full h-10 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold border border-slate-200 transition cursor-pointer"
+                    className="w-full h-10 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 transition cursor-pointer"
                   >
                     Fetch Bill
                   </button>
                   {fetchStatus && (
-                    <p className="text-[11px] text-amber-700 font-semibold mt-1.5 text-center">
+                    <p className="text-[11px] text-amber-700 dark:text-amber-400 font-semibold mt-1.5 text-center">
                       {fetchStatus}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Bill Amount (₹)
                   </label>
                   <input
@@ -167,7 +167,7 @@ export const Screen4Electricity: React.FC = () => {
                     placeholder="₹ Enter bill amount"
                     value={billAmount}
                     onChange={(e) => setBillAmount(e.target.value)}
-                    className="w-full h-11 px-3 rounded-lg border border-slate-300 text-xs font-mono text-black focus:outline-none focus:ring-1 focus:ring-[#DB0011]"
+                    className="w-full h-11 px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-[#DB0011]"
                   />
                 </div>
 
@@ -184,15 +184,15 @@ export const Screen4Electricity: React.FC = () => {
             {/* SECTION 2: ALL ELECTRICITY BILLERS LIST */}
             <div>
               <div className="flex items-center justify-between mb-2 px-1">
-                <h2 className="text-xs font-bold text-black uppercase tracking-wider">
+                <h2 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
                   All Electricity Billers ({filteredBillers.length})
                 </h2>
-                <span className="text-[10px] text-slate-500">BBPS Enabled</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400">BBPS Enabled</span>
               </div>
 
-              <div className="bg-[#FFFFFF] rounded-xl border border-slate-200/80 shadow-sm divide-y divide-slate-100 overflow-hidden max-h-[240px] overflow-y-auto">
+              <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm divide-y divide-slate-100 dark:divide-slate-800 overflow-hidden max-h-[240px] overflow-y-auto">
                 {filteredBillers.length === 0 ? (
-                  <div className="p-6 text-center text-xs text-slate-500">
+                  <div className="p-6 text-center text-xs text-slate-500 dark:text-slate-400">
                     No electricity operator found matching "{searchQuery}"
                   </div>
                 ) : (
@@ -201,7 +201,7 @@ export const Screen4Electricity: React.FC = () => {
                       key={biller.id}
                       type="button"
                       onClick={() => setSelectedBiller(biller.name)}
-                      className="w-full p-3 flex items-center justify-between hover:bg-slate-50 transition text-left cursor-pointer group"
+                      className="w-full p-3 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition text-left cursor-pointer group"
                     >
                       <div className="flex items-center gap-3">
                         <div
@@ -210,17 +210,17 @@ export const Screen4Electricity: React.FC = () => {
                           <Zap className="w-4 h-4 fill-white" />
                         </div>
                         <div>
-                          <h4 className="text-xs font-bold text-black group-hover:text-[#DB0011]">
+                          <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover:text-[#DB0011] dark:group-hover:text-red-400">
                             {biller.name}
                           </h4>
-                          <p className="text-[10px] text-slate-500">
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400">
                             {biller.state} · {biller.code}
                           </p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1 text-slate-400 group-hover:text-[#DB0011]">
-                        <span className="text-[10px] font-bold text-[#DB0011] opacity-0 group-hover:opacity-100 transition">
+                      <div className="flex items-center gap-1 text-slate-400 dark:text-slate-500 group-hover:text-[#DB0011] dark:group-hover:text-red-400">
+                        <span className="text-[10px] font-bold text-[#DB0011] dark:text-red-400 opacity-0 group-hover:opacity-100 transition">
                           Select
                         </span>
                         <ChevronRight className="w-4 h-4" />
@@ -237,54 +237,51 @@ export const Screen4Electricity: React.FC = () => {
         {step === 'confirm' && (
           <div className="space-y-4">
             {/* Amount Banner */}
-            <div className="bg-[#FFFFFF] rounded-2xl p-4 border border-slate-200 shadow-sm text-center relative overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm text-center relative overflow-hidden">
               <div className="absolute top-0 inset-x-0 h-1 bg-[#DB0011]" />
-              <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+              <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider">
                 Total Payable Amount
               </span>
-              <div className="text-2xl font-black text-black font-mono mt-0.5">
+              <div className="text-2xl font-black text-slate-900 dark:text-white font-mono mt-0.5">
                 ₹{parseFloat(billAmount || '0').toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </div>
             </div>
 
             {/* Summary Details */}
-            <div className="bg-white rounded-xl p-4 border border-slate-200 space-y-2 text-xs">
+            <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200/80 dark:border-slate-800 space-y-2 text-xs">
               <div className="flex justify-between items-center py-1">
-                <span className="text-slate-500">Biller Name</span>
-                <strong className="text-[#DB0011] font-bold text-right">{selectedBiller || 'Electricity Board'}</strong>
+                <span className="text-slate-500 dark:text-slate-400">Biller Name</span>
+                <strong className="text-[#DB0011] dark:text-red-400 font-bold text-right">{selectedBiller || 'Electricity Board'}</strong>
               </div>
 
-              <div className="flex justify-between items-center py-1 border-t border-slate-100">
-                <span className="text-slate-500">Consumer Number</span>
-                <span className="font-mono font-bold text-black text-right">{consumerNumber || '9021948210'}</span>
+              <div className="flex justify-between items-center py-1 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400">Consumer Number</span>
+                <span className="font-mono font-bold text-slate-900 dark:text-slate-100 text-right">{consumerNumber || '9021948210'}</span>
               </div>
 
-              <div className="flex justify-between items-center py-1 border-t border-slate-100">
-                <span className="text-slate-500">Convenience Fee</span>
-                <span className="text-emerald-700 font-bold text-right">₹0.00 (Free)</span>
+              <div className="flex justify-between items-center py-1 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400">Convenience Fee</span>
+                <span className="text-emerald-700 dark:text-emerald-400 font-bold text-right">₹0.00 (Free)</span>
               </div>
 
-              <div className="flex justify-between items-center py-1 border-t border-slate-100">
-                <span className="text-slate-500">Payment Gateway</span>
-                <span className="text-slate-700 font-semibold text-right">NPCI Bharat BillPay</span>
+              <div className="flex justify-between items-center py-1 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400">Payment Gateway</span>
+                <span className="text-slate-700 dark:text-slate-300 font-semibold text-right">NPCI Bharat BillPay</span>
               </div>
             </div>
 
             {/* Pay From Account */}
-            <div className="bg-white rounded-xl p-4 border border-slate-200 space-y-2">
-              <label className="block text-xs font-bold text-slate-700">
+            <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200/80 dark:border-slate-800 space-y-2">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                 Pay from: Select Account *
               </label>
               <select
                 value={payFromAccount}
                 onChange={(e) => setPayFromAccount(e.target.value)}
-                className="w-full h-11 px-3 rounded-xl border border-slate-300 text-xs font-medium text-black focus:outline-none focus:ring-1 focus:ring-[#DB0011] bg-white"
+                className="w-full h-11 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#DB0011] bg-white dark:bg-slate-800"
               >
                 <option value="HSBC Premier Savings - ••••2010">
                   HSBC Premier Savings - ••••2010 (Bal: ₹12,00,00,00,000.00)
-                </option>
-                <option value="HSBC Current Business Account - ••••8812">
-                  HSBC Current Business - ••••8812 (Bal: ₹50,00,000.00)
                 </option>
               </select>
             </div>
@@ -301,7 +298,7 @@ export const Screen4Electricity: React.FC = () => {
 
               <button
                 onClick={() => setStep('input')}
-                className="w-full h-10 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition cursor-pointer"
+                className="w-full h-10 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-xl transition cursor-pointer"
               >
                 Back to Edit
               </button>
@@ -312,9 +309,9 @@ export const Screen4Electricity: React.FC = () => {
         {/* ================= STEP 3: PROCESSING SPINNER ================= */}
         {step === 'processing' && (
           <div className="py-16 flex flex-col items-center justify-center text-center space-y-3">
-            <div className="w-14 h-14 rounded-full border-4 border-slate-200 border-t-[#DB0011] animate-spin" />
-            <h4 className="text-base font-bold text-black">Processing Electricity Bill...</h4>
-            <p className="text-xs text-slate-500 max-w-xs leading-relaxed">
+            <div className="w-14 h-14 rounded-full border-4 border-slate-200 dark:border-slate-800 border-t-[#DB0011] animate-spin" />
+            <h4 className="text-base font-bold text-slate-900 dark:text-white">Processing Electricity Bill...</h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed">
               Verifying transaction with Bharat BillPay gateway. Please do not refresh.
             </p>
           </div>
@@ -325,54 +322,54 @@ export const Screen4Electricity: React.FC = () => {
           <div className="space-y-4 text-center">
             {/* Green Tick */}
             <div className="relative inline-flex mb-1 mt-4">
-              <div className="w-16 h-16 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-lg ring-8 ring-emerald-100 animate-bounce">
+              <div className="w-16 h-16 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-lg ring-8 ring-emerald-100 dark:ring-emerald-950 animate-bounce">
                 <Check className="w-9 h-9 stroke-[3]" />
               </div>
             </div>
 
             <div>
-              <h3 className="text-lg font-black text-black">Electricity Bill Paid</h3>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">Electricity Bill Paid</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Receipt generated and cleared via BBPS
               </p>
             </div>
 
             {/* Amount Card */}
-            <div className="bg-[#FFFFFF] rounded-2xl p-4 border border-slate-200 shadow-sm relative overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 inset-x-0 h-1 bg-emerald-500" />
-              <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+              <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider">
                 Amount Paid
               </span>
-              <div className="text-3xl font-black text-black font-mono mt-0.5">
+              <div className="text-3xl font-black text-slate-900 dark:text-white font-mono mt-0.5">
                 ₹{parseFloat(billAmount || '0').toLocaleString('en-IN', { minimumFractionDigits: 2 })}
               </div>
             </div>
 
             {/* Receipt Details */}
-            <div className="bg-white rounded-xl p-4 border border-slate-200 text-left space-y-2 text-xs">
+            <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200/80 dark:border-slate-800 text-left space-y-2 text-xs">
               <div className="flex justify-between items-center py-1">
-                <span className="text-slate-500">BBPS Ref Number</span>
-                <strong className="text-black font-mono font-bold text-right text-[11px]">{successRef}</strong>
+                <span className="text-slate-500 dark:text-slate-400">BBPS Ref Number</span>
+                <strong className="text-slate-900 dark:text-white font-mono font-bold text-right text-[11px]">{successRef}</strong>
               </div>
 
-              <div className="flex justify-between items-center py-1 border-t border-slate-100">
-                <span className="text-slate-500">Electricity Board</span>
-                <strong className="text-slate-800 font-bold text-right">{selectedBiller || 'Electricity Board'}</strong>
+              <div className="flex justify-between items-center py-1 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400">Electricity Board</span>
+                <strong className="text-slate-800 dark:text-slate-200 font-bold text-right">{selectedBiller || 'Electricity Board'}</strong>
               </div>
 
-              <div className="flex justify-between items-center py-1 border-t border-slate-100">
-                <span className="text-slate-500">Consumer Number</span>
-                <span className="font-mono font-bold text-black text-right">{consumerNumber || '9021948210'}</span>
+              <div className="flex justify-between items-center py-1 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400">Consumer Number</span>
+                <span className="font-mono font-bold text-slate-900 dark:text-white text-right">{consumerNumber || '9021948210'}</span>
               </div>
 
-              <div className="flex justify-between items-center py-1 border-t border-slate-100">
-                <span className="text-slate-500">Paid From</span>
-                <span className="text-slate-700 font-medium text-right text-[11px]">{payFromAccount}</span>
+              <div className="flex justify-between items-center py-1 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400">Paid From</span>
+                <span className="text-slate-700 dark:text-slate-300 font-medium text-right text-[11px]">{payFromAccount}</span>
               </div>
 
-              <div className="flex justify-between items-center py-1 border-t border-slate-100">
-                <span className="text-slate-500">Date & Time</span>
-                <span className="text-slate-700 font-medium text-right text-[11px]">{successDate}</span>
+              <div className="flex justify-between items-center py-1 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-slate-500 dark:text-slate-400">Date & Time</span>
+                <span className="text-slate-700 dark:text-slate-300 font-medium text-right text-[11px]">{successDate}</span>
               </div>
             </div>
 
@@ -390,8 +387,8 @@ export const Screen4Electricity: React.FC = () => {
       </main>
 
       {/* Footer */}
-      <footer className="p-3 bg-[#FFFFFF] border-t border-slate-200 text-center flex items-center justify-center gap-1.5 text-xs text-slate-500">
-        <ShieldCheck className="w-4 h-4 text-emerald-600" />
+      <footer className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 text-center flex items-center justify-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+        <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
         <span>BBPS Bharat BillPay Instant Clearance</span>
       </footer>
 

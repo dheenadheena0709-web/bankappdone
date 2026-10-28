@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Dheena Bank Mobile</title>
     <meta name="description" content="Educational prototype of Dheena Bank mobile banking app with authentic physical mPassbook ledger, biometric login, transfers, bill payments, and investments." />
     <meta name="theme-color" content="#DB0011" />
@@ -23,7 +23,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
   </head>
-  <body class="bg-[#F5F5F5] text-slate-900 antialiased selection:bg-[#DB0011]/20 selection:text-[#DB0011]">
+  <body class="bg-[#F5F5F5] dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-[#DB0011]/20 selection:text-[#DB0011] transition-colors duration-200">
+    <script>
+      (function() {
+        try {
+          var theme = localStorage.getItem('hsbc_theme');
+          if (theme === 'dark' || theme === null) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

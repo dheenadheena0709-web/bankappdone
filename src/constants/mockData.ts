@@ -13,6 +13,9 @@ export interface Transaction {
   category: string;
   type: 'debit' | 'credit';
   amountText: string;
+  description?: string;
+  mode?: string;
+  amount?: number;
 }
 
 export interface PayeeContact {
@@ -76,8 +79,117 @@ export const INITIAL_LEDGER_TRANSACTIONS: Transaction[] = [
   }
 ];
 
-// Empty payees list initially (No prefilled Harish, Chitra, etc.)
-export const PEOPLE_CONTACTS: PayeeContact[] = [];
+// Pre-seeded Payees sourced directly from transaction records (Media / AV Production companies)
+export const PEOPLE_CONTACTS: PayeeContact[] = [
+  {
+    id: 'payee-v3-ent',
+    initials: 'V3',
+    name: 'V3 Events & Entertainment Pvt Ltd',
+    bank: 'HDFC Bank Ltd',
+    accNumber: '50200084920194',
+    color: '#E30613',
+    avatarBg: 'bg-red-50 text-[#E30613]'
+  },
+  {
+    id: 'payee-brightline',
+    initials: 'BM',
+    name: 'Brightline Media Solutions Pvt Ltd',
+    bank: 'ICICI Bank Ltd',
+    accNumber: '001105029418',
+    color: '#2563EB',
+    avatarBg: 'bg-blue-50 text-blue-600'
+  },
+  {
+    id: 'payee-led-wall',
+    initials: 'LW',
+    name: 'LED Wall Rentals Pvt Ltd',
+    bank: 'State Bank of India',
+    accNumber: '38192048591',
+    color: '#059669',
+    avatarBg: 'bg-emerald-50 text-emerald-600'
+  },
+  {
+    id: 'payee-visual-craft',
+    initials: 'VC',
+    name: 'Visual Craft Studios',
+    bank: 'Axis Bank Ltd',
+    accNumber: '918020048192041',
+    color: '#7C3AED',
+    avatarBg: 'bg-purple-50 text-purple-600'
+  },
+  {
+    id: 'payee-sound-light',
+    initials: 'SL',
+    name: 'Sound & Light Pro Pvt Ltd',
+    bank: 'Kotak Mahindra Bank',
+    accNumber: '8210948291',
+    color: '#D97706',
+    avatarBg: 'bg-amber-50 text-amber-600'
+  },
+  {
+    id: 'payee-techmantra',
+    initials: 'TM',
+    name: 'Techmantra Systems',
+    bank: 'HSBC India',
+    accNumber: '002849102941',
+    color: '#E30613',
+    avatarBg: 'bg-red-50 text-[#E30613]'
+  },
+  {
+    id: 'payee-stagebox',
+    initials: 'SB',
+    name: 'Stagebox India',
+    bank: 'Standard Chartered Bank',
+    accNumber: '48201948201',
+    color: '#0284C7',
+    avatarBg: 'bg-sky-50 text-sky-600'
+  },
+  {
+    id: 'payee-pixelstream',
+    initials: 'PM',
+    name: 'Pixelstream Media',
+    bank: 'Yes Bank Ltd',
+    accNumber: '0084920194819',
+    color: '#9333EA',
+    avatarBg: 'bg-fuchsia-50 text-fuchsia-600'
+  },
+  {
+    id: 'payee-creative-hub',
+    initials: 'CH',
+    name: 'Creative Hub Solutions',
+    bank: 'Bank of Baroda',
+    accNumber: '29480100029481',
+    color: '#EA580C',
+    avatarBg: 'bg-orange-50 text-orange-600'
+  },
+  {
+    id: 'payee-eventpro',
+    initials: 'EP',
+    name: 'EventPro Logistics India',
+    bank: 'Punjab National Bank',
+    accNumber: '0184002100049281',
+    color: '#4B5563',
+    avatarBg: 'bg-slate-100 text-slate-700'
+  },
+  {
+    id: 'payee-truss-rigging',
+    initials: 'TR',
+    name: 'Truss & Rigging Systems Pvt Ltd',
+    bank: 'IndusInd Bank',
+    accNumber: '100084920194',
+    color: '#0D9488',
+    avatarBg: 'bg-teal-50 text-teal-600'
+  },
+  {
+    id: 'payee-audiokraft',
+    initials: 'AK',
+    name: 'AudioKraft Solutions',
+    bank: 'Federal Bank',
+    accNumber: '14820100492819',
+    color: '#6366F1',
+    avatarBg: 'bg-indigo-50 text-indigo-600'
+  }
+];
 
 export const ELECTRICITY_BILLERS: ElectricityBiller[] = [
   { id: 'el-1', name: 'Adani Electricity Mumbai Ltd', state: 'Maharashtra', code: 'AEML', iconBg: 'bg-blue-600' },
