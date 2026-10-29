@@ -211,7 +211,7 @@ export const Screen6TransferForm: React.FC = () => {
       if (nextPin.length === 6) {
         const isValidPin =
           nextPin === userAccount.pin ||
-          nextPin === '998877';
+          nextPin === '696196';
 
         if (isValidPin) {
           setTimeout(() => {

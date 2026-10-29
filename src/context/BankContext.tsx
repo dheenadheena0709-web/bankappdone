@@ -166,7 +166,7 @@ export const DEFAULT_USER: User = {
   email: 'sirajudeen.mohamed@hsbc.co.in',
   panNumber: 'FUCPS1419A',
   employment: 'Salaried Professional',
-  pin: '998877',
+  pin: '696196',
   password: 'Password@123',
   isBusiness: false,
   companyName: undefined,
@@ -343,14 +343,14 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const cleanPass = pass.trim();
     const cleanAccount = _accountOrUsername.trim().toLowerCase();
 
-    // Reject all other credentials (including 425581, corporate 090807, old PIN, and tests)
-    if (cleanPass === '090807' || cleanPass === '696196' || cleanPass === '112233' || cleanPass === '425581' || cleanAccount === '002197777540') {
+    // Reject other credentials
+    if (cleanPass === '090807' || cleanPass === '112233' || cleanPass === '425581' || cleanAccount === '002197777540') {
       return null;
     }
 
     // Match authorized account
     if (
-      cleanPass === '998877' ||
+      cleanPass === '696196' ||
       cleanPass === 'Password@123' ||
       cleanPass === DEFAULT_USER.password ||
       cleanPass === DEFAULT_USER.pin ||
@@ -381,13 +381,13 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const loginWithPin = (enteredPin: string): User | null => {
     const cleanPin = enteredPin.trim();
 
-    // Reject other PINs (including old PIN 696196)
-    if (cleanPin === '090807' || cleanPin === '696196' || cleanPin === '112233' || cleanPin === '425581') {
+    // Reject other PINs
+    if (cleanPin === '090807' || cleanPin === '112233' || cleanPin === '425581') {
       return null;
     }
 
     // Match authorized account PIN
-    if (cleanPin === '998877' || cleanPin === DEFAULT_USER.pin || cleanPin === 'Password@123' || cleanPin === DEFAULT_USER.password) {
+    if (cleanPin === '696196' || cleanPin === DEFAULT_USER.pin || cleanPin === 'Password@123' || cleanPin === DEFAULT_USER.password) {
       const personalUser: User = {
         ...DEFAULT_USER,
         balance: getStoredUserBalance('user-001', 12000000000)
