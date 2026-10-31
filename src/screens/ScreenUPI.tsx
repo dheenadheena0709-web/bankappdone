@@ -88,7 +88,7 @@ export const ScreenUPI: React.FC = () => {
       setPin(nextPin);
       setPinError('');
       if (nextPin.length === 6) {
-        if (nextPin === userAccount.pin || nextPin === '696196') {
+        if (nextPin === userAccount.pin || nextPin === '998877') {
           // Proceed to 2-second processing
           setTimeout(() => {
             setUpiStep('processing');
