@@ -16,6 +16,9 @@ export interface Transaction {
   description?: string;
   mode?: string;
   amount?: number;
+  bankName?: string;
+  branchName?: string;
+  displayParticulars?: string;
 }
 
 export interface PayeeContact {
@@ -40,8 +43,9 @@ export interface ElectricityBiller {
 }
 
 // Balance: 12,00,00,00,000 INR
+// Balance: 12,00,00,00,000 INR
 export const FIXED_BALANCE_AMOUNT = 12000000000.00;
-export const FIXED_BALANCE_DISPLAY = '12,00,00,00,000';
+export const FIXED_BALANCE_DISPLAY = '12,00,00,00,000.00';
 
 // Transaction History: GREEN LEAF SWIFT at 1st, Acc Opening Deposit at 2nd
 export const INITIAL_LEDGER_TRANSACTIONS: Transaction[] = [
@@ -53,13 +57,16 @@ export const INITIAL_LEDGER_TRANSACTIONS: Transaction[] = [
     transferMode: 'SWIFT',
     status: 'Success',
     narration: 'SWIFT INWARD REMITTANCE / SENDER: GREEN LEAF / VALUE DT: 23-SEP-2026',
+    displayParticulars: 'SWIFT Inward Remittance / GREEN LEAF',
+    bankName: 'Barclays Bank UK',
+    branchName: 'London Corporate Branch',
     refNo: 'SWIFT-GL-23092026-88910',
     withdrawal: null,
     deposit: 12000000000.00,
     balance: 12000000000.00,
     category: 'Inward Remittance',
     type: 'credit',
-    amountText: '12,00,00,00,000'
+    amountText: '12,00,00,00,000.00'
   },
   {
     id: 'tx-opening-deposit-01',
@@ -69,13 +76,58 @@ export const INITIAL_LEDGER_TRANSACTIONS: Transaction[] = [
     transferMode: 'Cash/Direct Deposit',
     status: 'Success',
     narration: 'Acc Opening Deposit',
+    displayParticulars: 'Account Opening Deposit',
+    bankName: 'HSBC India',
+    branchName: 'HSBC Fort Main Branch, Mumbai',
     refNo: 'DEP-09092026-1047',
     withdrawal: null,
     deposit: 10000.00,
     balance: 10000.00,
     category: 'Acc Opening Deposit',
     type: 'credit',
-    amountText: '10,000'
+    amountText: '10,000.00'
+  }
+];
+
+// Transaction History for Raja gopal: 2 transactions with clean list title & details on click
+export const RAJA_GOPAL_TRANSACTIONS: Transaction[] = [
+  {
+    id: 'tx-raja-02',
+    date: '14/09/2026',
+    time: '11:52 AM',
+    senderName: 'Venkatachalam P',
+    transferMode: 'RTGS',
+    status: 'Success',
+    narration: 'RTGS/INWARD/VENKATACHALAM P/ICICI BANK COIMBATORE BRANCH/VALUE DT: 14-SEP-2026',
+    displayParticulars: 'RTGS Inward Remittance / Venkatachalam P',
+    bankName: 'ICICI Bank Ltd',
+    branchName: 'Coimbatore Branch, ICICI Bank',
+    refNo: 'RTGS-ICIC-14092026-1152',
+    withdrawal: null,
+    deposit: 13000000.00,
+    balance: 13025000.00,
+    category: 'Inward Remittance',
+    type: 'credit',
+    amountText: '1,30,00,000.00'
+  },
+  {
+    id: 'tx-raja-01',
+    date: '08/09/2026',
+    time: '11:20 AM',
+    senderName: 'Acc Opening Deposit',
+    transferMode: 'Cash/Direct Deposit',
+    status: 'Success',
+    narration: 'Acc Opening Deposit / Cash Deposit',
+    displayParticulars: 'Account Opening Deposit',
+    bankName: 'HSBC India',
+    branchName: 'HSBC Fort Main Branch, Mumbai',
+    refNo: 'DEP-08092026-1120',
+    withdrawal: null,
+    deposit: 25000.00,
+    balance: 25000.00,
+    category: 'Acc Opening Deposit',
+    type: 'credit',
+    amountText: '25,000.00'
   }
 ];
 

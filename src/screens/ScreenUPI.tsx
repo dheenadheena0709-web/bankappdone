@@ -88,7 +88,7 @@ export const ScreenUPI: React.FC = () => {
       setPin(nextPin);
       setPinError('');
       if (nextPin.length === 6) {
-        if (nextPin === userAccount.pin || nextPin === '998877') {
+        if (nextPin === userAccount.pin || nextPin === '998877' || nextPin === '733926') {
           // Proceed to 2-second processing
           setTimeout(() => {
             setUpiStep('processing');
@@ -499,7 +499,7 @@ export const ScreenUPI: React.FC = () => {
                 <div>
                   <h3 className="text-base font-bold text-black dark:text-white">Enter 6-Digit UPI PIN</h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Authorizing payment of ₹{(parseFloat(upiAmount) || 0).toLocaleString('en-IN')} to {payeeUpi}
+                    Authorizing payment of ₹{(parseFloat(upiAmount) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} to {payeeUpi}
                   </p>
                 </div>
 

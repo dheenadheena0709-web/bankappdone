@@ -62,7 +62,7 @@ export const MoreLimits: React.FC = () => {
                 <p className="text-xs text-slate-500 dark:text-slate-400">NPCI ceiling capped at ₹1 Lakh</p>
               </div>
               <span className="text-sm font-bold text-[#DB0011] dark:text-red-400 font-mono">
-                ₹{upiLimit.toLocaleString('en-IN')}
+                ₹{upiLimit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
             <input
@@ -75,9 +75,9 @@ export const MoreLimits: React.FC = () => {
               className="w-full accent-[#DB0011] cursor-pointer"
             />
             <div className="flex justify-between text-[10px] text-slate-400 dark:text-slate-500 font-semibold">
-              <span>₹10,000</span>
-              <span>₹50,000</span>
-              <span>Max ₹1,00,000</span>
+              <span>₹10,000.00</span>
+              <span>₹50,000.00</span>
+              <span>Max ₹1,00,000.00</span>
             </div>
           </div>
 
@@ -89,7 +89,7 @@ export const MoreLimits: React.FC = () => {
                 <p className="text-xs text-slate-500 dark:text-slate-400">24x7 instant interbank settlement</p>
               </div>
               <span className="text-sm font-bold text-[#DB0011] dark:text-red-400 font-mono">
-                ₹{impsLimit.toLocaleString('en-IN')}
+                ₹{impsLimit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
             <input
@@ -102,9 +102,9 @@ export const MoreLimits: React.FC = () => {
               className="w-full accent-[#DB0011] cursor-pointer"
             />
             <div className="flex justify-between text-[10px] text-slate-400 dark:text-slate-500 font-semibold">
-              <span>₹50,000</span>
-              <span>₹2,50,000</span>
-              <span>Max ₹5,00,000</span>
+              <span>₹50,000.00</span>
+              <span>₹2,50,000.00</span>
+              <span>Max ₹5,00,000.00</span>
             </div>
           </div>
 
@@ -116,7 +116,7 @@ export const MoreLimits: React.FC = () => {
                 <p className="text-xs text-slate-500 dark:text-slate-400">Large transfers with 2-factor OTP</p>
               </div>
               <span className="text-sm font-bold text-[#DB0011] dark:text-red-400 font-mono">
-                ₹{neftLimit.toLocaleString('en-IN')}
+                ₹{neftLimit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
             <input

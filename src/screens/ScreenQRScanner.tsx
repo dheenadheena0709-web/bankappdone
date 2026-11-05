@@ -595,7 +595,7 @@ export const ScreenQRScanner: React.FC = () => {
                   <div className="flex justify-between items-center pt-1 border-t border-slate-200/60 dark:border-slate-700">
                     <span className="text-slate-500 dark:text-slate-400 font-medium">Requested Amount</span>
                     <strong className="text-sm font-black text-[#DB0011] dark:text-red-400">
-                      ₹{parseFloat(upiInfo.amount).toLocaleString('en-IN')}
+                      ₹{parseFloat(upiInfo.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </strong>
                   </div>
                 )}

@@ -17,9 +17,9 @@ export const LuxuryBalanceShimmer: React.FC<LuxuryBalanceShimmerProps> = ({
 }) => {
   const formattedAmount =
     typeof amount === 'number'
-      ? (amount % 1 !== 0
-          ? amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-          : amount.toLocaleString('en-IN'))
+      ? amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      : typeof amount === 'string' && !isNaN(Number(amount.replace(/,/g, ''))) && amount.trim() !== ''
+      ? Number(amount.replace(/,/g, '')).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
       : amount;
 
   const textClasses = className

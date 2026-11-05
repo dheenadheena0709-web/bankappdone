@@ -135,7 +135,7 @@ export const Screen7PaymentSuccess: React.FC = () => {
             <div className="flex justify-between items-center py-1 border-t border-slate-100 dark:border-slate-800">
               <span className="text-slate-500 dark:text-slate-400 font-medium">Amount</span>
               <strong className="text-base font-black text-[#DB0011] dark:text-red-400 font-mono text-right">
-                ₹ {displayAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                ₹ {displayAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </strong>
             </div>
 

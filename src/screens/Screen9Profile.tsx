@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { BottomNav } from '../components/BottomNav';
 import { useBank } from '../context/BankContext';
@@ -20,7 +21,9 @@ import {
   Moon,
   HelpCircle,
   ChevronDown,
-  BookOpen
+  BookOpen,
+  RefreshCw,
+  Maximize2
 } from 'lucide-react';
 
 interface LanguageOption {
@@ -41,14 +44,19 @@ const LANGUAGES: LanguageOption[] = [
 
 export const Screen9Profile: React.FC = () => {
   const navigate = useNavigate();
-  const { userAccount, currentUser, setCurrentUser, users, setIsLoggedIn, darkMode, toggleDarkMode } = useBank();
+  const { userAccount, currentUser, setCurrentUser, users, setIsLoggedIn, darkMode, toggleDarkMode, switchAccount } = useBank();
   const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<string>('en-IN');
   const [langToast, setLangToast] = useState<string | null>(null);
-  const [expandedFaqId, setExpandedFaqId] = useState<string | null>('faq-passbook');
+  const [expandedFaqId, setExpandedFaqId] = useState<string | null>(null);
 
   const toggleInlineFaq = (id: string) => {
     setExpandedFaqId((prev) => (prev === id ? null : id));
+  };
+
+  const toggleSection = (section: string) => {
+    setExpandedSection((prev) => (prev === section ? null : section));
   };
 
   const handleLogout = () => {
@@ -111,24 +119,24 @@ export const Screen9Profile: React.FC = () => {
       {/* Main List */}
       <main className="flex-1 px-4 py-3 space-y-3.5">
         {/* Profile Card - Single Savings Account */}
-        <div className="bg-gradient-to-br from-white via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-800 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
+        <div className="bg-gradient-to-br from-white via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-800 rounded-2xl border border-slate-200 dark:border-slate-800 p-3.5 sm:p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-2.5">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-[#DB0011] text-white flex items-center justify-center text-sm font-black shadow-md">
-                {(userAccount.holderName || userAccount.name || 'Account Holder')
+              <div className="w-11 h-11 rounded-2xl bg-[#DB0011] text-white flex items-center justify-center text-sm font-black shadow-md">
+                {(userAccount.holderName || userAccount.name || 'Raja gopal')
                   .split(' ')
                   .filter(Boolean)
                   .map((w: string) => w[0])
                   .join('')
                   .slice(0, 2)
-                  .toUpperCase() || 'HB'}
+                  .toUpperCase() || 'RG'}
               </div>
               <div>
                 <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                  {userAccount.holderName || userAccount.name || 'Sirajudeen Mohamed Sharif'}
+                  {userAccount.holderName || userAccount.name || 'Raja gopal'}
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                  A/C: {userAccount.accountNumber || userAccount.accountNo || '002197782010'}
+                  A/C: {userAccount.accountNumber || userAccount.accountNo || '002198547321'}
                 </p>
               </div>
             </div>
@@ -143,110 +151,277 @@ export const Screen9Profile: React.FC = () => {
             <div className="p-2 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
               <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-medium">Mobile / Phone</span>
               <strong className="font-mono block text-[9.5px] leading-tight text-slate-900 dark:text-slate-100 font-bold tracking-tight">
-                {userAccount.phone || userAccount.mobile || '+91 96775 13691'}
+                {userAccount.phone || userAccount.mobile || '7339267709'}
               </strong>
             </div>
 
             <div className="p-2 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60">
               <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-medium">Email</span>
               <strong className="text-slate-900 dark:text-slate-100 truncate block text-[10px]">
-                {userAccount.email || 'Not provided'}
+                {userAccount.email || 'gcrtech.raja@gmail.com'}
               </strong>
             </div>
 
             <div className="p-2 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60">
               <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-medium">PAN Number</span>
               <strong className="font-mono text-slate-900 dark:text-slate-100 truncate block">
-                {userAccount.panNumber || userAccount.panNo || 'FUCPS1419A'}
+                {userAccount.panNumber || userAccount.panNo || 'AVVPR5087J'}
               </strong>
             </div>
           </div>
         </div>
 
-        {/* Personal & Account Details */}
+        {/* Personal & Account Details (Inline Expandable - Zero Scroll Needed!) */}
         <div className="bg-[#FFFFFF] dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
-          {/* 1. Personal details (ID and tax residency) > */}
-          <button
-            onClick={() => setActiveModal('personal')}
-            className="w-full p-3.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition text-left cursor-pointer group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-950/60 text-[#DB0011] dark:text-red-400 flex items-center justify-center font-bold">
-                <User className="w-4 h-4" />
+          {/* 1. Personal details */}
+          <div>
+            <div
+              onClick={() => toggleSection('personal')}
+              className="w-full p-3.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition cursor-pointer group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-950/60 text-[#DB0011] dark:text-red-400 flex items-center justify-center font-bold">
+                  <User className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-black dark:text-white group-hover:text-[#DB0011] dark:group-hover:text-red-400">
+                    Personal details
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">ID and tax residency</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-sm font-bold text-black dark:text-white group-hover:text-[#DB0011] dark:group-hover:text-red-400">
-                  Personal details
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">ID and tax residency</p>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveModal('personal');
+                  }}
+                  className="p-1 rounded-md text-slate-400 hover:text-[#DB0011] dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                  title="Open card view"
+                  aria-label="Open card view"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                </button>
+                <ChevronDown
+                  className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                    expandedSection === 'personal' ? 'rotate-180 text-[#DB0011] dark:text-red-400' : ''
+                  }`}
+                />
               </div>
             </div>
-            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition" />
-          </button>
 
-          {/* 2. Contact details (Phone, email) > */}
-          <button
-            onClick={() => setActiveModal('contact')}
-            className="w-full p-3.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition text-left cursor-pointer group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 flex items-center justify-center font-bold">
-                <Phone className="w-4 h-4" />
+            {expandedSection === 'personal' && (
+              <div className="px-3.5 pb-3.5 pt-1 bg-slate-50/70 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800/80 animate-fade-in space-y-1.5 text-xs">
+                <div className="flex justify-between py-1 border-b border-slate-200/50 dark:border-slate-700/50">
+                  <span className="text-slate-500 dark:text-slate-400">Full Name</span>
+                  <strong className="text-slate-900 dark:text-slate-100">{userAccount.holderName || userAccount.name || 'Raja gopal'}</strong>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-200/50 dark:border-slate-700/50">
+                  <span className="text-slate-500 dark:text-slate-400">Account Number</span>
+                  <strong className="font-mono text-slate-900 dark:text-slate-100">{userAccount.accountNumber || userAccount.accountNo || '002198547321'}</strong>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-200/50 dark:border-slate-700/50">
+                  <span className="text-slate-500 dark:text-slate-400">Account Type</span>
+                  <strong className="text-slate-900 dark:text-slate-100 text-[11px] text-right">SAVINGS ACCOUNT - PREMIER</strong>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-200/50 dark:border-slate-700/50">
+                  <span className="text-slate-500 dark:text-slate-400">IFSC Code</span>
+                  <strong className="font-mono text-slate-900 dark:text-slate-100">{userAccount.ifsc || 'HSBC0400002'}</strong>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-200/50 dark:border-slate-700/50">
+                  <span className="text-slate-500 dark:text-slate-400">MICR Code</span>
+                  <strong className="font-mono text-slate-900 dark:text-slate-100">{userAccount.micr || userAccount.micrCode || '600002013'}</strong>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-200/50 dark:border-slate-700/50">
+                  <span className="text-slate-500 dark:text-slate-400">PAN Number</span>
+                  <strong className="font-mono text-slate-900 dark:text-slate-100">{userAccount.panNumber || userAccount.panNo || 'AVVPR5087J'}</strong>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-200/50 dark:border-slate-700/50">
+                  <span className="text-slate-500 dark:text-slate-400">Account Status</span>
+                  <span className="font-bold text-emerald-700 dark:text-emerald-400">Active</span>
+                </div>
+                <div className="flex justify-between py-1">
+                  <span className="text-slate-500 dark:text-slate-400">Tax Residency</span>
+                  <span className="font-bold text-emerald-700 dark:text-emerald-400">India Resident</span>
+                </div>
               </div>
-              <div>
-                <h3 className="text-sm font-bold text-black dark:text-white group-hover:text-[#DB0011] dark:group-hover:text-red-400">
-                  Contact details
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Phone, email
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition" />
-          </button>
+            )}
+          </div>
 
-          {/* 3. Employment details (Address, Income) > */}
-          <button
-            onClick={() => setActiveModal('employment')}
-            className="w-full p-3.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition text-left cursor-pointer group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 flex items-center justify-center font-bold">
-                <Briefcase className="w-4 h-4" />
+          {/* 2. Contact details */}
+          <div>
+            <div
+              onClick={() => toggleSection('contact')}
+              className="w-full p-3.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition cursor-pointer group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 flex items-center justify-center font-bold">
+                  <Phone className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-black dark:text-white group-hover:text-[#DB0011] dark:group-hover:text-red-400">
+                    Contact details
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Phone, email</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-sm font-bold text-black dark:text-white group-hover:text-[#DB0011] dark:group-hover:text-red-400">
-                  Employment details
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Address, Income</p>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveModal('contact');
+                  }}
+                  className="p-1 rounded-md text-slate-400 hover:text-[#DB0011] dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                  title="Open card view"
+                  aria-label="Open card view"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                </button>
+                <ChevronDown
+                  className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                    expandedSection === 'contact' ? 'rotate-180 text-[#DB0011] dark:text-red-400' : ''
+                  }`}
+                />
               </div>
             </div>
-            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition" />
-          </button>
 
-          {/* 4. KYC Declaration (Re-submit) > */}
-          <button
-            onClick={() => setActiveModal('kyc')}
-            className="w-full p-3.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition text-left cursor-pointer group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-950/60 text-[#DB0011] dark:text-red-400 flex items-center justify-center font-bold">
-                <FileCheck2 className="w-4 h-4" />
+            {expandedSection === 'contact' && (
+              <div className="px-3.5 pb-3.5 pt-1 bg-slate-50/70 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800/80 animate-fade-in space-y-1.5 text-xs">
+                <div className="flex justify-between py-1 border-b border-slate-200/50 dark:border-slate-700/50">
+                  <span className="text-slate-500 dark:text-slate-400">Mobile Phone</span>
+                  <strong className="font-mono text-slate-900 dark:text-slate-100 font-bold">
+                    {userAccount.phone || userAccount.mobile || '7339267709'}
+                  </strong>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-200/50 dark:border-slate-700/50">
+                  <span className="text-slate-500 dark:text-slate-400">Email Address</span>
+                  <strong className="text-slate-900 dark:text-slate-100 text-[11px] truncate">
+                    {userAccount.email || 'gcrtech.raja@gmail.com'}
+                  </strong>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-200/50 dark:border-slate-700/50">
+                  <span className="text-slate-500 dark:text-slate-400">Registered Branch</span>
+                  <strong className="text-slate-900 dark:text-slate-100 text-[10px] text-right">
+                    {userAccount.branch || 'HSBC Fort Main Branch, Mumbai'}
+                  </strong>
+                </div>
+                <div className="py-1.5">
+                  <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Communication Address</span>
+                  <strong className="text-slate-900 dark:text-slate-100 text-[11px] font-normal leading-relaxed block mt-0.5">
+                    {userAccount.address || '14, Cross Cut Road, Gandhipuram, Coimbatore, Tamil Nadu 641012'}
+                  </strong>
+                </div>
               </div>
-              <div>
-                <h3 className="text-sm font-bold text-black dark:text-white group-hover:text-[#DB0011] dark:group-hover:text-red-400">
-                  KYC Declaration
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Re-submit declaration</p>
+            )}
+          </div>
+
+          {/* 3. Employment details */}
+          <div>
+            <div
+              onClick={() => toggleSection('employment')}
+              className="w-full p-3.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition cursor-pointer group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 flex items-center justify-center font-bold">
+                  <Briefcase className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-black dark:text-white group-hover:text-[#DB0011] dark:group-hover:text-red-400">
+                    Employment details
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Address, Income</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveModal('employment');
+                  }}
+                  className="p-1 rounded-md text-slate-400 hover:text-[#DB0011] dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                  title="Open card view"
+                  aria-label="Open card view"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                </button>
+                <ChevronDown
+                  className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                    expandedSection === 'employment' ? 'rotate-180 text-[#DB0011] dark:text-red-400' : ''
+                  }`}
+                />
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-800/60 px-2 py-0.5 rounded-full">
-                Active
-              </span>
-              <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition" />
+
+            {expandedSection === 'employment' && (
+              <div className="px-3.5 pb-3.5 pt-1 bg-slate-50/70 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800/80 animate-fade-in space-y-1.5 text-xs">
+                <div className="flex justify-between py-1 border-b border-slate-200/50 dark:border-slate-700/50">
+                  <span className="text-slate-500 dark:text-slate-400">Employment Type</span>
+                  <strong className="text-slate-900 dark:text-slate-100">{userAccount.employment || 'Professional / Business'}</strong>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-200/50 dark:border-slate-700/50">
+                  <span className="text-slate-500 dark:text-slate-400">Annual Income</span>
+                  <strong className="font-mono text-slate-900 dark:text-slate-100">₹25,00,000.00</strong>
+                </div>
+                <div className="py-1.5">
+                  <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Residential Address</span>
+                  <strong className="text-slate-900 dark:text-slate-100 text-[11px] font-normal leading-relaxed block mt-0.5">
+                    {userAccount.address || '14, Cross Cut Road, Gandhipuram, Coimbatore, Tamil Nadu 641012'}
+                  </strong>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 4. KYC Declaration */}
+          <div>
+            <div
+              onClick={() => toggleSection('kyc')}
+              className="w-full p-3.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/60 transition cursor-pointer group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-950/60 text-[#DB0011] dark:text-red-400 flex items-center justify-center font-bold">
+                  <FileCheck2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-black dark:text-white group-hover:text-[#DB0011] dark:group-hover:text-red-400">
+                    KYC Declaration
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Re-submit declaration</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-800/60 px-2 py-0.5 rounded-full">
+                  Active
+                </span>
+                <ChevronDown
+                  className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                    expandedSection === 'kyc' ? 'rotate-180 text-[#DB0011] dark:text-red-400' : ''
+                  }`}
+                />
+              </div>
             </div>
-          </button>
+
+            {expandedSection === 'kyc' && (
+              <div className="px-3.5 pb-3.5 pt-1 bg-slate-50/70 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800/80 animate-fade-in space-y-2 text-xs">
+                <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 rounded-lg text-emerald-800 dark:text-emerald-300">
+                  <p className="font-bold">KYC Verified &amp; Active</p>
+                  <p className="text-[11px]">Valid till October 2028 &bull; Biometric Verified</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setLangToast('KYC documents are up to date');
+                    setExpandedSection(null);
+                  }}
+                  className="w-full h-8.5 bg-[#DB0011] hover:bg-[#b5000e] text-white font-bold rounded-lg cursor-pointer text-xs transition"
+                >
+                  Re-submit KYC
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* SETTINGS & APP PREFERENCES (Language Selector, Dark Theme, Tools) */}
@@ -509,168 +684,170 @@ export const Screen9Profile: React.FC = () => {
         </div>
       </main>
 
-      {/* Modal Dialog */}
-      {activeModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-xl w-full max-w-sm p-4 shadow-xl text-left border border-slate-200 dark:border-slate-800">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800 mb-2.5">
-              <h3 className="text-sm font-bold text-black dark:text-white">
-                {activeModal === 'language' && 'Select App Language'}
-                {activeModal === 'personal' && 'Personal details'}
-                {activeModal === 'contact' && 'Contact details'}
-                {activeModal === 'employment' && 'Employment details'}
-                {activeModal === 'kyc' && 'KYC Declaration'}
-              </h3>
+      {/* Modal Dialog with createPortal (Viewport Centered, z-[100], Zero Scroll Needed!) */}
+      {activeModal &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] bg-black/60 dark:bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 animate-fade-in">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-sm p-4 shadow-2xl text-left border border-slate-200 dark:border-slate-800 animate-scale-up">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800 mb-2">
+                <h3 className="text-sm font-bold text-black dark:text-white">
+                  {activeModal === 'language' && 'Select App Language'}
+                  {activeModal === 'personal' && 'Personal details'}
+                  {activeModal === 'contact' && 'Contact details'}
+                  {activeModal === 'employment' && 'Employment details'}
+                  {activeModal === 'kyc' && 'KYC Declaration'}
+                </h3>
+                <button
+                  onClick={() => setActiveModal(null)}
+                  className="p-1 rounded-lg text-slate-400 hover:text-black dark:hover:text-white transition cursor-pointer"
+                  aria-label="Close dialog"
+                >
+                  <X className="w-4.5 h-4.5" />
+                </button>
+              </div>
+
+              <div className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300 py-0.5">
+                {/* LANGUAGE SELECTOR */}
+                {activeModal === 'language' && (
+                  <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
+                    {LANGUAGES.map((lang) => {
+                      const isSelected = selectedLanguage === lang.code;
+                      return (
+                        <button
+                          key={lang.code}
+                          onClick={() => handleSelectLanguage(lang)}
+                          className={`w-full p-2.5 rounded-lg border text-left flex items-center justify-between transition cursor-pointer ${
+                            isSelected
+                              ? 'border-[#DB0011] bg-red-50 dark:bg-red-950/60 text-[#DB0011] dark:text-red-400 font-bold'
+                              : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200'
+                          }`}
+                        >
+                          <div>
+                            <div className="text-xs font-semibold">{lang.name}</div>
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400">{lang.native}</div>
+                          </div>
+                          {isSelected && <Check className="w-4 h-4 text-[#DB0011] dark:text-red-400" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {activeModal === 'personal' && (
+                  <>
+                    <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-slate-500 dark:text-slate-400">Full Name</span>
+                      <strong className="text-black dark:text-white">{userAccount.holderName || userAccount.name || 'Raja gopal'}</strong>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-slate-500 dark:text-slate-400">Account Number</span>
+                      <strong className="font-mono text-black dark:text-white">{userAccount.accountNumber || userAccount.accountNo || '002198547321'}</strong>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-slate-500 dark:text-slate-400">Account Type</span>
+                      <strong className="text-black dark:text-white text-[11px] text-right">SAVINGS ACCOUNT - PREMIER</strong>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-slate-500 dark:text-slate-400">IFSC Code</span>
+                      <strong className="font-mono text-black dark:text-white">{userAccount.ifsc || 'HSBC0400002'}</strong>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-slate-500 dark:text-slate-400">MICR Code</span>
+                      <strong className="font-mono text-black dark:text-white">{userAccount.micr || userAccount.micrCode || '600002013'}</strong>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-slate-500 dark:text-slate-400">PAN Number</span>
+                      <strong className="font-mono text-black dark:text-white">{userAccount.panNumber || userAccount.panNo || 'AVVPR5087J'}</strong>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-slate-500 dark:text-slate-400">Account Status</span>
+                      <span className="font-bold text-emerald-700 dark:text-emerald-400">Active</span>
+                    </div>
+                    <div className="flex justify-between py-1">
+                      <span className="text-slate-500 dark:text-slate-400">Tax Residency</span>
+                      <span className="font-bold text-emerald-700 dark:text-emerald-400">India Resident</span>
+                    </div>
+                  </>
+                )}
+
+                {activeModal === 'contact' && (
+                  <>
+                    <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-slate-500 dark:text-slate-400">Mobile Phone</span>
+                      <strong className="font-mono text-black dark:text-white font-bold">
+                        {userAccount.phone || userAccount.mobile || '7339267709'}
+                      </strong>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-slate-500 dark:text-slate-400">Email Address</span>
+                      <strong className="text-black dark:text-white text-[11px] truncate">
+                        {userAccount.email || 'gcrtech.raja@gmail.com'}
+                      </strong>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-slate-500 dark:text-slate-400">Registered Branch</span>
+                      <strong className="text-black dark:text-white text-[10px] text-right">
+                        {userAccount.branch || 'HSBC Fort Main Branch, Mumbai'}
+                      </strong>
+                    </div>
+                    <div className="py-1.5">
+                      <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Communication Address</span>
+                      <strong className="text-black dark:text-white text-[11px] font-normal leading-relaxed block mt-0.5">
+                        {userAccount.address || '14, Cross Cut Road, Gandhipuram, Coimbatore, Tamil Nadu 641012'}
+                      </strong>
+                    </div>
+                  </>
+                )}
+
+                {activeModal === 'employment' && (
+                  <>
+                    <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-slate-500 dark:text-slate-400">Employment Type</span>
+                      <strong className="text-black dark:text-white">{userAccount.employment || 'Professional / Business'}</strong>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-slate-500 dark:text-slate-400">Annual Income</span>
+                      <strong className="font-mono text-black dark:text-white">₹25,00,000.00</strong>
+                    </div>
+                    <div className="py-1.5">
+                      <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Residential Address</span>
+                      <strong className="text-black dark:text-white text-[11px] font-normal leading-relaxed block mt-0.5">
+                        {userAccount.address || '14, Cross Cut Road, Gandhipuram, Coimbatore, Tamil Nadu 641012'}
+                      </strong>
+                    </div>
+                  </>
+                )}
+
+                {activeModal === 'kyc' && (
+                  <>
+                    <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 rounded-lg text-emerald-800 dark:text-emerald-300">
+                      <p className="font-bold">KYC Verified &amp; Active</p>
+                      <p className="text-[11px]">Valid till October 2028 &bull; Biometric Verified</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setLangToast('KYC documents are up to date');
+                        setActiveModal(null);
+                      }}
+                      className="w-full mt-2 h-9 bg-[#DB0011] hover:bg-[#b5000e] text-white font-bold rounded-lg cursor-pointer text-xs transition"
+                    >
+                      Re-submit KYC
+                    </button>
+                  </>
+                )}
+              </div>
+
               <button
                 onClick={() => setActiveModal(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-black dark:hover:text-white cursor-pointer"
+                className="w-full mt-2.5 h-8.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold text-black dark:text-white rounded-lg cursor-pointer transition"
               >
-                <X className="w-5 h-5" />
+                Done
               </button>
             </div>
-
-            <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300 py-1">
-              {/* LANGUAGE SELECTOR */}
-              {activeModal === 'language' && (
-                <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
-                  {LANGUAGES.map((lang) => {
-                    const isSelected = selectedLanguage === lang.code;
-                    return (
-                      <button
-                        key={lang.code}
-                        onClick={() => handleSelectLanguage(lang)}
-                        className={`w-full p-2.5 rounded-lg border text-left flex items-center justify-between transition cursor-pointer ${
-                          isSelected
-                            ? 'border-[#DB0011] bg-red-50 dark:bg-red-950/60 text-[#DB0011] dark:text-red-400 font-bold'
-                            : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200'
-                        }`}
-                      >
-                        <div>
-                          <div className="text-xs font-semibold">{lang.name}</div>
-                          <div className="text-[11px] text-slate-500 dark:text-slate-400">{lang.native}</div>
-                        </div>
-                        {isSelected && <Check className="w-4 h-4 text-[#DB0011] dark:text-red-400" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-
-              {activeModal === 'personal' && (
-                <>
-                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-slate-500 dark:text-slate-400">Full Name</span>
-                    <strong className="text-black dark:text-white">{userAccount.holderName || userAccount.name || 'Sirajudeen Mohamed'}</strong>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-slate-500 dark:text-slate-400">Account Number</span>
-                    <strong className="font-mono text-black dark:text-white">{userAccount.accountNumber || userAccount.accountNo || '002197782010'}</strong>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-slate-500 dark:text-slate-400">Account Type</span>
-                    <strong className="text-black dark:text-white text-[11px] text-right">{(userAccount.accountName || 'SAVINGS ACCOUNT - PREMIER').toUpperCase()}</strong>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-slate-500 dark:text-slate-400">IFSC Code</span>
-                    <strong className="font-mono text-black dark:text-white">{userAccount.ifsc || 'HSBC0400002'}</strong>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-slate-500 dark:text-slate-400">MICR Code</span>
-                    <strong className="font-mono text-black dark:text-white">{userAccount.micr || userAccount.micrCode || '600002013'}</strong>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-slate-500 dark:text-slate-400">PAN Number</span>
-                    <strong className="font-mono text-black dark:text-white">{userAccount.panNumber || userAccount.panNo || 'FUCPS1419A'}</strong>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-slate-500 dark:text-slate-400">Account Status</span>
-                    <strong className="text-emerald-700 dark:text-emerald-400 font-bold">
-                      Active
-                    </strong>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-slate-500 dark:text-slate-400">Tax Residency</span>
-                    <span className="font-bold text-emerald-700 dark:text-emerald-400">India Resident</span>
-                  </div>
-                </>
-              )}
-
-              {activeModal === 'contact' && (
-                <>
-                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-slate-500 dark:text-slate-400">Mobile Phone</span>
-                    <strong className="font-mono text-black dark:text-white font-bold">
-                      {userAccount.phone || userAccount.mobile || '+91 9876543210'}
-                    </strong>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-slate-500 dark:text-slate-400">Email Address</span>
-                    <strong className="text-black dark:text-white text-[11px] truncate">
-                      {userAccount.email || 'Not provided'}
-                    </strong>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-slate-500 dark:text-slate-400">Registered Branch</span>
-                    <strong className="text-black dark:text-white text-[10px] text-right">{userAccount.branch || 'HSBC Fort Main Branch, Mumbai'}</strong>
-                  </div>
-                  <div className="py-2 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Registered Address</span>
-                    <strong className="text-black dark:text-white text-[11px] font-normal leading-relaxed block mt-0.5">
-                      {userAccount.address || (String(userAccount.id) === 'user-001' ? '142, Anna Salai, Chennai, Tamil Nadu 600002' : 'Not provided')}
-                    </strong>
-                  </div>
-                </>
-              )}
-
-              {activeModal === 'employment' && (
-                <>
-                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-slate-500 dark:text-slate-400">Employment</span>
-                    <strong className="text-black dark:text-white">{userAccount.employment || 'Salaried - Professional'}</strong>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-slate-500 dark:text-slate-400">Annual Income</span>
-                    <strong className="font-mono text-black dark:text-white">
-                      ₹25,00,000
-                    </strong>
-                  </div>
-                  <div className="py-2 border-b border-slate-100 dark:border-slate-800">
-                    <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Residential Address</span>
-                    <strong className="text-black dark:text-white text-[11px] font-normal leading-relaxed block mt-0.5">
-                      {userAccount.address || (String(userAccount.id) === 'user-001' ? '142, Anna Salai, Chennai, Tamil Nadu 600002' : 'Not provided')}
-                    </strong>
-                  </div>
-                </>
-              )}
-
-              {activeModal === 'kyc' && (
-                <>
-                  <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 rounded-lg text-emerald-800 dark:text-emerald-300">
-                    <p className="font-bold">KYC Verified</p>
-                    <p className="text-[11px]">Valid till October 2028</p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setLangToast('KYC documents are up to date');
-                      setActiveModal(null);
-                    }}
-                    className="w-full mt-2 h-10 bg-[#DB0011] hover:bg-[#b5000e] text-white font-bold rounded-lg cursor-pointer"
-                  >
-                    Re-submit KYC
-                  </button>
-                </>
-              )}
-            </div>
-
-            <button
-              onClick={() => setActiveModal(null)}
-              className="w-full mt-3 h-9 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold text-black dark:text-white rounded-lg cursor-pointer"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

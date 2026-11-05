@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { BrandLogo } from '../components/BrandLogo';
 import { HomeSkeleton } from '../components/HomeSkeleton';
@@ -49,6 +50,7 @@ export const Screen2Home: React.FC = () => {
   const {
     userAccount,
     currentUser,
+    users,
     switchAccount,
     transactions,
     showBalance,
@@ -226,7 +228,7 @@ export const Screen2Home: React.FC = () => {
 
         {/* ================= ACCOUNT OVERVIEW BAR ================= */}
         <div className="relative z-10 flex items-center justify-between mb-2.5 px-4 gap-2">
-          {/* Account Indicator: Personal Savings ONLY */}
+          {/* Account Indicator: Personal Savings */}
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 p-1.5 px-3 bg-black/40 rounded-2xl backdrop-blur-md border border-white/20 shadow-inner">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -491,9 +493,9 @@ export const Screen2Home: React.FC = () => {
                           <span>{tx.time}</span>
                         </div>
 
-                        {/* Narration */}
+                        {/* Narration Preview */}
                         <div className="text-[10px] font-mono text-slate-600 dark:text-slate-400 mt-0.5 line-clamp-1" title={tx.narration}>
-                          {tx.narration}
+                          {tx.displayParticulars || tx.narration}
                         </div>
 
                         {/* Reference Number */}
@@ -641,126 +643,143 @@ export const Screen2Home: React.FC = () => {
       </main>
 
       {/* ================= TRANSACTION ADVICE MODAL (AUTHENTIC PREMIER SLIP) ================= */}
-      {selectedTx && (
-        <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-xs flex items-center justify-center p-3">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-sm p-5 shadow-2xl text-left border border-slate-200 dark:border-slate-800">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
-              <div className="flex items-center gap-2">
-                <div className="p-1 bg-[#E30613] rounded">
-                  <BrandLogo size="sm" variant="red" />
+      {selectedTx &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] bg-black/60 dark:bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 animate-fade-in">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-sm p-4 shadow-2xl text-left border border-slate-200 dark:border-slate-800 animate-scale-up">
+              <div className="flex items-center justify-between pb-2.5 border-b border-slate-200 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <div className="p-1 bg-[#E30613] rounded">
+                    <BrandLogo size="sm" variant="red" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-black text-slate-900 dark:text-slate-100 uppercase tracking-tight">
+                      {selectedTx.withdrawal ? 'Debit Voucher / Payment Advice' : 'Credit Advice / Inward Remittance'}
+                    </h3>
+                    <span className="text-[9px] text-slate-500 dark:text-slate-400 font-mono">
+                      {selectedTx.withdrawal ? 'Corporate Debit Confirmation' : 'Corporate Credit Receipt'}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-xs font-black text-slate-900 dark:text-slate-100 uppercase tracking-tight">
-                    {selectedTx.withdrawal ? 'Debit Voucher / Payment Advice' : 'Credit Advice / Inward Remittance'}
-                  </h3>
-                  <span className="text-[9px] text-slate-500 dark:text-slate-400 font-mono">
-                    {selectedTx.withdrawal ? 'Corporate Debit Confirmation' : 'Corporate Credit Receipt'}
+                <button
+                  onClick={() => setSelectedTx(null)}
+                  className="p-1 rounded-lg text-slate-400 hover:text-black dark:hover:text-white cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="text-center py-3 border-b border-slate-100 dark:border-slate-800">
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-1.5 border ${
+                    selectedTx.withdrawal
+                      ? 'bg-rose-50 dark:bg-rose-950/60 text-[#E30613] dark:text-red-400 border-rose-200 dark:border-rose-800'
+                      : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
+                  }`}
+                >
+                  <CheckCircle2 className="w-5 h-5 stroke-[2.5]" />
+                </div>
+                <span
+                  className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                    selectedTx.withdrawal
+                      ? 'text-rose-700 dark:text-rose-300 bg-rose-100 dark:bg-rose-950/80'
+                      : 'text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80'
+                  }`}
+                >
+                  Status: {selectedTx.status} · {selectedTx.withdrawal ? 'Debited' : 'Credited'}
+                </span>
+                <div
+                  className={`text-2xl font-black font-mono mt-1 ${
+                    selectedTx.withdrawal
+                      ? 'text-[#E30613] dark:text-red-400'
+                      : 'text-emerald-600 dark:text-emerald-400'
+                  }`}
+                >
+                  {selectedTx.withdrawal
+                    ? `-₹${selectedTx.withdrawal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    : `+₹${(selectedTx.deposit || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                </div>
+              </div>
+
+              <div className="py-2 space-y-1.5 text-xs divide-y divide-slate-100 dark:divide-slate-800">
+                <div className="pt-1 flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Date & Time</span>
+                  <strong className="text-slate-900 dark:text-slate-100 font-mono">{selectedTx.date} · {selectedTx.time}</strong>
+                </div>
+                <div className="pt-1.5 flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">
+                    {selectedTx.withdrawal ? 'Beneficiary / Payee' : 'Particulars / Remitter'}
+                  </span>
+                  <strong className="text-slate-900 dark:text-slate-100 font-black">{selectedTx.senderName}</strong>
+                </div>
+                {selectedTx.bankName && (
+                  <div className="pt-1.5 flex justify-between">
+                    <span className="text-slate-500 dark:text-slate-400">Remitter Bank</span>
+                    <strong className="text-slate-900 dark:text-slate-100 font-bold">{selectedTx.bankName}</strong>
+                  </div>
+                )}
+                {selectedTx.branchName && (
+                  <div className="pt-1.5 flex justify-between items-center">
+                    <span className="text-slate-500 dark:text-slate-400">Branch Details</span>
+                    <span className="font-bold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/70 px-2 py-0.5 rounded-md border border-sky-200 dark:border-sky-800 text-[11px]">
+                      {selectedTx.branchName}
+                    </span>
+                  </div>
+                )}
+                <div className="pt-1.5 flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Transfer Mode</span>
+                  <strong className="text-sky-700 dark:text-sky-400 font-bold">{selectedTx.transferMode}</strong>
+                </div>
+                <div className="pt-1.5 flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">
+                    {selectedTx.withdrawal ? 'Debited Account' : 'Beneficiary Account'}
+                  </span>
+                  <strong className="text-slate-900 dark:text-slate-100 font-mono">{currentAccNumber}</strong>
+                </div>
+                <div className="pt-1.5 flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Narration</span>
+                  <span className="text-slate-900 dark:text-slate-100 font-mono text-[10px] text-right max-w-[200px] truncate">
+                    {selectedTx.narration}
                   </span>
                 </div>
+                <div className="pt-1.5 flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Reference / Ref No</span>
+                  <strong className="text-slate-900 dark:text-slate-100 font-mono text-[11px]">{selectedTx.refNo}</strong>
+                </div>
+                <div className="pt-1.5 flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Ledger Balance</span>
+                  <strong className="text-[#E30613] dark:text-red-400 font-mono font-bold">
+                    ₹{selectedTx.balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </strong>
+                </div>
               </div>
-              <button
-                onClick={() => setSelectedTx(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-black dark:hover:text-white cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
 
-            <div className="text-center py-4 border-b border-slate-100 dark:border-slate-800">
-              <div
-                className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2 border ${
-                  selectedTx.withdrawal
-                    ? 'bg-rose-50 dark:bg-rose-950/60 text-[#E30613] dark:text-red-400 border-rose-200 dark:border-rose-800'
-                    : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
-                }`}
-              >
-                <CheckCircle2 className="w-6 h-6 stroke-[2.5]" />
-              </div>
-              <span
-                className={`text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
-                  selectedTx.withdrawal
-                    ? 'text-rose-700 dark:text-rose-300 bg-rose-100 dark:bg-rose-950/80'
-                    : 'text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80'
-                }`}
-              >
-                Status: {selectedTx.status} · {selectedTx.withdrawal ? 'Debited' : 'Credited'}
-              </span>
-              <div
-                className={`text-2xl font-black font-mono mt-2 ${
-                  selectedTx.withdrawal
-                    ? 'text-[#E30613] dark:text-red-400'
-                    : 'text-emerald-600 dark:text-emerald-400'
-                }`}
-              >
-                {selectedTx.withdrawal
-                  ? `-₹${selectedTx.withdrawal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                  : `+₹${(selectedTx.deposit || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+              <div className="pt-2.5 border-t border-slate-200 dark:border-slate-800 flex gap-2">
+                <button
+                  onClick={() => {
+                    window.print();
+                  }}
+                  className="flex-1 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Print</span>
+                </button>
+                <button
+                  onClick={() => {
+                    showToast('Receipt downloaded');
+                    setSelectedTx(null);
+                  }}
+                  className="flex-1 h-9 rounded-lg bg-[#E30613] hover:bg-[#c40510] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer shadow-xs"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download</span>
+                </button>
               </div>
             </div>
-
-            <div className="py-3 space-y-2 text-xs divide-y divide-slate-100 dark:divide-slate-800">
-              <div className="pt-1 flex justify-between">
-                <span className="text-slate-500 dark:text-slate-400">Date & Time</span>
-                <strong className="text-slate-900 dark:text-slate-100 font-mono">{selectedTx.date} · {selectedTx.time}</strong>
-              </div>
-              <div className="pt-2 flex justify-between">
-                <span className="text-slate-500 dark:text-slate-400">
-                  {selectedTx.withdrawal ? 'Beneficiary / Payee' : 'Particulars / Remitter'}
-                </span>
-                <strong className="text-slate-900 dark:text-slate-100 font-black">{selectedTx.senderName}</strong>
-              </div>
-              <div className="pt-2 flex justify-between">
-                <span className="text-slate-500 dark:text-slate-400">Transfer Mode</span>
-                <strong className="text-sky-700 dark:text-sky-400 font-bold">{selectedTx.transferMode}</strong>
-              </div>
-              <div className="pt-2 flex justify-between">
-                <span className="text-slate-500 dark:text-slate-400">
-                  {selectedTx.withdrawal ? 'Debited Account' : 'Beneficiary Account'}
-                </span>
-                <strong className="text-slate-900 dark:text-slate-100 font-mono">{currentAccNumber}</strong>
-              </div>
-              <div className="pt-2 flex justify-between">
-                <span className="text-slate-500 dark:text-slate-400">Narration</span>
-                <span className="text-slate-900 dark:text-slate-100 font-mono text-[10px] text-right max-w-[200px] truncate">
-                  {selectedTx.narration}
-                </span>
-              </div>
-              <div className="pt-2 flex justify-between">
-                <span className="text-slate-500 dark:text-slate-400">Reference / Ref No</span>
-                <strong className="text-slate-900 dark:text-slate-100 font-mono text-[11px]">{selectedTx.refNo}</strong>
-              </div>
-              <div className="pt-2 flex justify-between">
-                <span className="text-slate-500 dark:text-slate-400">Ledger Balance</span>
-                <strong className="text-[#E30613] dark:text-red-400 font-mono font-bold">
-                  ₹{selectedTx.balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </strong>
-              </div>
-            </div>
-
-            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex gap-2">
-              <button
-                onClick={() => {
-                  window.print();
-                }}
-                className="flex-1 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
-              >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Print</span>
-              </button>
-              <button
-                onClick={() => {
-                  showToast('Receipt downloaded');
-                  setSelectedTx(null);
-                }}
-                className="flex-1 h-10 rounded-lg bg-[#E30613] hover:bg-[#c40510] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer shadow-xs"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
 
       {/* ================= ACCOUNT DETAILS MODAL / POPUP ================= */}
       {showAccountDetailsModal && (

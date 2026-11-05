@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { INITIAL_LEDGER_TRANSACTIONS, Transaction, FIXED_BALANCE_DISPLAY } from '../constants/mockData';
+import { INITIAL_LEDGER_TRANSACTIONS, RAJA_GOPAL_TRANSACTIONS, Transaction, FIXED_BALANCE_DISPLAY } from '../constants/mockData';
 
 export interface DebitCard {
   number: string;
@@ -185,8 +185,50 @@ export const DEFAULT_USER: User = {
   transactions: INITIAL_LEDGER_TRANSACTIONS
 };
 
-// Single Active Account: Sirajudeen Mohamed Sharif
-export const INITIAL_USERS: User[] = [DEFAULT_USER];
+// 2. NEW USER - Raja gopal
+export const RAJA_GOPAL_USER: User = {
+  id: 'user-002',
+  accountNo: '002198547321',
+  accountNumber: '002198547321',
+  fullAccountNumber: '002198547321',
+  name: 'Raja gopal',
+  holderName: 'Raja gopal',
+  accountName: 'SAVINGS ACCOUNT - PREMIER',
+  accountType: 'Premier Savings Account',
+  type: 'SAVINGS',
+  balance: getStoredUserBalance('user-002', 13025000),
+  balanceText: '1,30,25,000.00',
+  currency: 'INR',
+  ifsc: 'HSBC0400002',
+  branch: 'HSBC Fort Main Branch, Mumbai',
+  upiId: '7339267709@hsbc',
+  mobile: '7339267709',
+  phone: '7339267709',
+  email: 'gcrtech.raja@gmail.com',
+  panNumber: 'AVVPR5087J',
+  panNo: 'AVVPR5087J',
+  employment: 'Professional / Business',
+  pin: '733926',
+  password: '733926',
+  isBusiness: false,
+  companyName: undefined,
+  gstin: null,
+  gstNumber: null,
+  cin: null,
+  address: '14, Cross Cut Road, Gandhipuram, Coimbatore, Tamil Nadu 641012',
+  debitCard: {
+    number: '4532 9182 3409 7709',
+    maskedNumber: '•••• •••• •••• 7709',
+    cvv: '528',
+    expiry: '09/30',
+    holder: 'Raja gopal',
+    status: 'Active'
+  },
+  transactions: RAJA_GOPAL_TRANSACTIONS
+};
+
+// Active Accounts: Raja gopal & Sirajudeen Mohamed Sharif
+export const INITIAL_USERS: User[] = [RAJA_GOPAL_USER, DEFAULT_USER];
 
 // Helper for future member creation (ready for 30 members)
 export const createMemberUser = (params: {
@@ -212,7 +254,7 @@ export const createMemberUser = (params: {
     accountName: `${params.name.toUpperCase()} - PREMIER`,
     accountType: 'Premier Savings Account',
     balance: bal,
-    balanceText: bal.toLocaleString('en-IN'),
+    balanceText: bal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
     currency: 'INR',
     ifsc: 'HSBC0400002',
     branch: 'HSBC Fort Main Branch, Mumbai',
@@ -245,7 +287,7 @@ export const createMemberUser = (params: {
         balance: bal,
         category: 'Inward Remittance',
         type: 'credit',
-        amountText: bal.toLocaleString('en-IN')
+        amountText: bal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
       }
     ]
   };
@@ -281,11 +323,20 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Central Users List - contains only the savings member
   const [users, setUsers] = useState<User[]>(INITIAL_USERS);
 
-  // Central Current User State (Authorized account only)
+  // Central Current User State (defaults to newly opened account: Raja gopal)
   const [currentUser, setCurrentUser] = useState<User>(() => {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const storedId = localStorage.getItem('hsbc_current_user_id');
+      if (storedId === 'user-001') {
+        return {
+          ...DEFAULT_USER,
+          balance: getStoredUserBalance('user-001', 12000000000)
+        };
+      }
+    }
     return {
-      ...DEFAULT_USER,
-      balance: getStoredUserBalance('user-001', 12000000000)
+      ...RAJA_GOPAL_USER,
+      balance: getStoredUserBalance('user-002', 13025000)
     };
   });
 
@@ -312,8 +363,8 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [currentUser]);
 
-  // Single savings account state
-  const savingsAccounts = [currentUser];
+  // Savings accounts state
+  const savingsAccounts = users;
   const savingsAccount = currentUser;
   const activeAccountType = 'savings' as const;
   const selectedAccountId = currentUser.accountNo;
@@ -322,23 +373,46 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUsers((prev) => [...prev, newUser]);
   };
 
-  // Switch Account
-  const switchAccount = (_accountTypeOrId?: string): User => {
+  // Switch Account between active accounts
+  const switchAccount = (accountTypeOrId?: string): User => {
     setLastPayment(null);
-    setCurrentUser(DEFAULT_USER);
-    setSelectedAccount(DEFAULT_USER);
-    setUserAccount(DEFAULT_USER);
-    return DEFAULT_USER;
+    let target = users.find((u) => u.id === accountTypeOrId || u.accountNo === accountTypeOrId);
+    if (!target) {
+      target = currentUser.id === RAJA_GOPAL_USER.id ? DEFAULT_USER : RAJA_GOPAL_USER;
+    }
+    setCurrentUser(target);
+    setSelectedAccount(target);
+    setUserAccount(target);
+    try {
+      localStorage.setItem('hsbc_current_user_id', String(target.id));
+    } catch {
+      // ignore
+    }
+    return target;
   };
 
-  const switchUser = (_userIdOrAccount?: string): User | null => {
-    setCurrentUser(DEFAULT_USER);
-    setSelectedAccount(DEFAULT_USER);
-    setUserAccount(DEFAULT_USER);
-    return DEFAULT_USER;
+  const switchUser = (userIdOrAccount?: string): User | null => {
+    let target = users.find(
+      (u) =>
+        u.id === userIdOrAccount ||
+        u.accountNo === userIdOrAccount ||
+        u.name.toLowerCase().includes((userIdOrAccount || '').toLowerCase())
+    );
+    if (!target) {
+      target = currentUser.id === RAJA_GOPAL_USER.id ? DEFAULT_USER : RAJA_GOPAL_USER;
+    }
+    setCurrentUser(target);
+    setSelectedAccount(target);
+    setUserAccount(target);
+    try {
+      localStorage.setItem('hsbc_current_user_id', String(target.id));
+    } catch {
+      // ignore
+    }
+    return target;
   };
 
-  // Login with Password: Only authorized account allowed
+  // Login with Password: Only authorized accounts allowed
   const loginWithPassword = (_accountOrUsername: string, pass: string): User | null => {
     const cleanPass = pass.trim();
     const cleanAccount = _accountOrUsername.trim().toLowerCase();
@@ -348,7 +422,33 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return null;
     }
 
-    // Match authorized account
+    // 1. Match Raja gopal account (password: 733926)
+    if (
+      cleanPass === '733926' ||
+      cleanPass === RAJA_GOPAL_USER.password ||
+      cleanAccount === '002198547321' ||
+      cleanAccount.includes('raja') ||
+      cleanAccount.includes('gopal') ||
+      cleanAccount.includes('gcrtech') ||
+      cleanAccount === '7339267709'
+    ) {
+      const rajaUser: User = {
+        ...RAJA_GOPAL_USER,
+        balance: getStoredUserBalance('user-002', 13025000)
+      };
+      setCurrentUser(rajaUser);
+      setSelectedAccount(rajaUser);
+      setUserAccount(rajaUser);
+      try {
+        localStorage.setItem('hsbc_current_user_id', 'user-002');
+      } catch {
+        // ignore
+      }
+      setIsLoggedIn(true);
+      return rajaUser;
+    }
+
+    // 2. Match Sirajudeen Mohamed Sharif account (password: Password@123 / PIN: 998877)
     if (
       cleanPass === '998877' ||
       cleanPass === 'Password@123' ||
@@ -377,7 +477,7 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return null;
   };
 
-  // Login with PIN: Only authorized account allowed
+  // Login with PIN: Only authorized accounts allowed
   const loginWithPin = (enteredPin: string): User | null => {
     const cleanPin = enteredPin.trim();
 
@@ -386,7 +486,25 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return null;
     }
 
-    // Match authorized account PIN
+    // 1. Match Raja gopal PIN (733926)
+    if (cleanPin === '733926' || cleanPin === RAJA_GOPAL_USER.pin || cleanPin === RAJA_GOPAL_USER.password) {
+      const rajaUser: User = {
+        ...RAJA_GOPAL_USER,
+        balance: getStoredUserBalance('user-002', 13025000)
+      };
+      setCurrentUser(rajaUser);
+      setSelectedAccount(rajaUser);
+      setUserAccount(rajaUser);
+      try {
+        localStorage.setItem('hsbc_current_user_id', 'user-002');
+      } catch {
+        // ignore
+      }
+      setIsLoggedIn(true);
+      return rajaUser;
+    }
+
+    // 2. Match Sirajudeen Mohamed Sharif PIN (998877)
     if (cleanPin === '998877' || cleanPin === DEFAULT_USER.pin || cleanPin === 'Password@123' || cleanPin === DEFAULT_USER.password) {
       const personalUser: User = {
         ...DEFAULT_USER,
@@ -408,9 +526,10 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   // Transactions are dynamically derived from currentUser
-  const userTransactions = currentUser.transactions && currentUser.transactions.length > 0
-    ? currentUser.transactions
-    : (currentUser.id === 'user-001' ? INITIAL_LEDGER_TRANSACTIONS : []);
+  const userTransactions =
+    currentUser.transactions && currentUser.transactions.length > 0
+      ? currentUser.transactions
+      : (currentUser.id === 'user-002' ? RAJA_GOPAL_TRANSACTIONS : INITIAL_LEDGER_TRANSACTIONS);
 
   const [showBalance, setShowBalance] = useState<boolean>(true);
   const [activeNavTab, setActiveNavTab] = useState<string>('home');
@@ -499,7 +618,7 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       balance: newBalance,
       category: 'Transfer',
       type: 'debit',
-      amountText: `₹${amount.toLocaleString('en-IN')}`
+      amountText: `₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
     };
 
     const updatedTransactions = [newTx, ...(currentUser.transactions || [])];
@@ -507,7 +626,7 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const updatedUser = {
       ...currentUser,
       balance: newBalance,
-      balanceText: newBalance.toLocaleString('en-IN'),
+      balanceText: newBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
       transactions: updatedTransactions
     };
 
@@ -561,7 +680,7 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       balance: newBalance,
       category: 'Utilities',
       type: 'debit',
-      amountText: `₹${amount.toLocaleString('en-IN')}`
+      amountText: `₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
     };
 
     const updatedTransactions = [newTx, ...(currentUser.transactions || [])];
@@ -569,7 +688,7 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const updatedUser = {
       ...currentUser,
       balance: newBalance,
-      balanceText: newBalance.toLocaleString('en-IN'),
+      balanceText: newBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
       transactions: updatedTransactions
     };
 
@@ -602,7 +721,7 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem('hsbc_balance_user-002');
     localStorage.removeItem('hsbc_balance_user-003');
     setUsers(INITIAL_USERS);
-    setCurrentUser(DEFAULT_USER);
+    setCurrentUser(RAJA_GOPAL_USER);
   };
 
   return (

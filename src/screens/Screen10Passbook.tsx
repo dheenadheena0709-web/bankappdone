@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useBank } from '../context/BankContext';
 import { BrandLogo } from '../components/BrandLogo';
 import { PassbookSkeleton } from '../components/PassbookSkeleton';
+import { Transaction } from '../constants/mockData';
 import {
   Printer,
   Download,
   ArrowLeft,
   Stamp,
   Search,
-  CheckCheck
+  CheckCheck,
+  X,
+  CheckCircle2
 } from 'lucide-react';
 
 export const Screen10Passbook: React.FC = () => {
@@ -18,6 +22,7 @@ export const Screen10Passbook: React.FC = () => {
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [filterQuery, setFilterQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
 
   // Elegant skeleton loading simulation for digital passbook ledger
   useEffect(() => {
@@ -203,16 +208,23 @@ export const Screen10Passbook: React.FC = () => {
                 {filteredTransactions.map((tx) => (
                   <tr
                     key={tx.id}
-                    className="hover:bg-blue-50/50 dark:hover:bg-slate-800/50 transition-colors bg-emerald-50/30 dark:bg-emerald-950/20"
+                    onClick={() => setSelectedTx(tx)}
+                    className="hover:bg-blue-100/70 dark:hover:bg-slate-800 transition-colors bg-emerald-50/30 dark:bg-emerald-950/20 cursor-pointer group"
+                    title="Click to view full transaction and branch details"
                   >
-                    <td className="py-2 pl-4 pr-1 text-slate-700 dark:text-slate-300 font-bold whitespace-nowrap text-[10px]">
+                    <td className="py-2.5 pl-4 pr-1 text-slate-700 dark:text-slate-300 font-bold whitespace-nowrap text-[10px]">
                       <div>{tx.date}</div>
                       <div className="text-[9px] text-slate-500 dark:text-slate-400 font-normal">{tx.time || '10:30 AM'}</div>
                     </td>
 
-                    <td className="py-2 px-2 text-black dark:text-white font-bold text-[10px] tracking-tight">
-                      <div className="text-slate-900 dark:text-slate-100 font-extrabold" title={tx.narration}>
-                        {tx.narration}
+                    <td className="py-2.5 px-2 text-black dark:text-white font-bold text-[10px] tracking-tight">
+                      <div className="text-slate-900 dark:text-slate-100 font-extrabold flex items-center gap-1.5 flex-wrap" title={tx.narration}>
+                        <span>{tx.displayParticulars || tx.narration}</span>
+                        {tx.branchName && (
+                          <span className="text-[9px] font-sans font-bold text-sky-700 dark:text-sky-300 bg-sky-100/80 dark:bg-sky-950/80 px-1.5 py-0.2 rounded border border-sky-300/80 dark:border-sky-800">
+                            Branch Details &gt;
+                          </span>
+                        )}
                       </div>
                       <div className="text-[9px] text-slate-500 dark:text-slate-400 font-normal mt-0.5 flex items-center gap-1">
                         <span>Ref: {tx.refNo}</span>
@@ -222,21 +234,21 @@ export const Screen10Passbook: React.FC = () => {
                     </td>
 
                     {/* Withdrawal (Debit in Red) */}
-                    <td className="py-2 px-2 text-right font-extrabold text-[#DB0011] dark:text-red-400 whitespace-nowrap text-[11px]">
+                    <td className="py-2.5 px-2 text-right font-extrabold text-[#DB0011] dark:text-red-400 whitespace-nowrap text-[11px]">
                       {tx.withdrawal !== null
                         ? `₹${tx.withdrawal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                         : '-'}
                     </td>
 
                     {/* Deposit (Credit in Green) */}
-                    <td className="py-2 px-2 text-right font-extrabold text-emerald-700 dark:text-emerald-400 whitespace-nowrap text-[11px]">
+                    <td className="py-2.5 px-2 text-right font-extrabold text-emerald-700 dark:text-emerald-400 whitespace-nowrap text-[11px]">
                       {tx.deposit !== null ? (
                         <span>+₹{tx.deposit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       ) : '-'}
                     </td>
 
                     {/* Balance */}
-                    <td className="py-2 pl-2 pr-4 text-right font-extrabold text-black dark:text-white whitespace-nowrap text-[11px]">
+                    <td className="py-2.5 pl-2 pr-4 text-right font-extrabold text-black dark:text-white whitespace-nowrap text-[11px]">
                       <span>₹{tx.balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </td>
                   </tr>
@@ -261,6 +273,127 @@ export const Screen10Passbook: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Transaction Details Modal when clicking any row */}
+      {selectedTx &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] bg-black/60 dark:bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 animate-fade-in print:hidden">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-sm p-4 text-slate-900 dark:text-slate-100 shadow-2xl border border-slate-200 dark:border-slate-800 transition-colors animate-scale-up">
+              <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <div className="p-1 bg-[#DB0011] rounded">
+                    <BrandLogo size="sm" variant="red" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                      Transaction Details
+                    </h3>
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
+                      Official Ledger Record
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedTx(null)}
+                  className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                  aria-label="Close"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="py-3 text-center border-b border-slate-100 dark:border-slate-800">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-0.5">
+                  Transaction Amount
+                </span>
+                <div
+                  className={`text-2xl font-black font-mono tracking-tight ${
+                    selectedTx.withdrawal ? 'text-[#DB0011] dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'
+                  }`}
+                >
+                  {selectedTx.withdrawal
+                    ? `-₹${selectedTx.withdrawal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    : `+₹${(selectedTx.deposit || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                </div>
+              </div>
+
+              <div className="py-2 space-y-1.5 text-xs divide-y divide-slate-100 dark:divide-slate-800">
+                <div className="pt-1 flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Date & Time</span>
+                  <strong className="text-slate-900 dark:text-slate-100 font-mono">
+                    {selectedTx.date} · {selectedTx.time}
+                  </strong>
+                </div>
+                <div className="pt-1.5 flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">
+                    {selectedTx.withdrawal ? 'Beneficiary / Payee' : 'Particulars / Remitter'}
+                  </span>
+                  <strong className="text-slate-900 dark:text-slate-100 font-black">
+                    {selectedTx.senderName}
+                  </strong>
+                </div>
+                {selectedTx.bankName && (
+                  <div className="pt-1.5 flex justify-between">
+                    <span className="text-slate-500 dark:text-slate-400">Remitter Bank</span>
+                    <strong className="text-slate-900 dark:text-slate-100 font-bold">
+                      {selectedTx.bankName}
+                    </strong>
+                  </div>
+                )}
+                {selectedTx.branchName && (
+                  <div className="pt-1.5 flex justify-between items-center">
+                    <span className="text-slate-500 dark:text-slate-400">Branch Details</span>
+                    <span className="font-bold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/70 px-2 py-0.5 rounded-md border border-sky-200 dark:border-sky-800 text-[11px]">
+                      {selectedTx.branchName}
+                    </span>
+                  </div>
+                )}
+                <div className="pt-1.5 flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Transfer Mode</span>
+                  <strong className="text-sky-700 dark:text-sky-400 font-bold">
+                    {selectedTx.transferMode}
+                  </strong>
+                </div>
+                <div className="pt-1.5 flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Narration</span>
+                  <span className="text-slate-900 dark:text-slate-100 font-mono text-[10px] text-right max-w-[200px]">
+                    {selectedTx.narration}
+                  </span>
+                </div>
+                <div className="pt-1.5 flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Reference / Ref No</span>
+                  <strong className="text-slate-900 dark:text-slate-100 font-mono text-[11px]">
+                    {selectedTx.refNo}
+                  </strong>
+                </div>
+                <div className="pt-1.5 flex justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Ledger Balance</span>
+                  <strong className="text-[#DB0011] dark:text-red-400 font-mono font-bold">
+                    ₹{selectedTx.balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </strong>
+                </div>
+              </div>
+
+              <div className="pt-2.5 border-t border-slate-200 dark:border-slate-800 flex gap-2">
+                <button
+                  onClick={() => window.print()}
+                  className="flex-1 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Print</span>
+                </button>
+                <button
+                  onClick={() => setSelectedTx(null)}
+                  className="flex-1 h-9 rounded-lg bg-[#DB0011] hover:bg-[#b5000e] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer shadow-xs"
+                >
+                  <span>Close</span>
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
 
       {/* Bottom Sticky Action Bar */}
       <div className="p-3 bg-[#FFFFFF] dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 print:hidden">

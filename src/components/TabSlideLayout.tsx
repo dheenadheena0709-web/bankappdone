@@ -110,9 +110,9 @@ export const TabSlideLayout: React.FC<TabSlideLayoutProps> = ({ children }) => {
         {/* Incoming view during 350ms transition, or static view when settled */}
         <div
           key={`curr-${currentLocation.pathname}`}
-          className={`w-full min-h-full transform-gpu ${
+          className={`w-full min-h-full ${
             isTransitioning
-              ? `relative z-20 ${
+              ? `relative z-20 transform-gpu ${
                   direction === 'forward'
                     ? 'tab-slide-pane-in-right'
                     : 'tab-slide-pane-in-left'
