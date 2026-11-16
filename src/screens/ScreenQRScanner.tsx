@@ -349,7 +349,7 @@ export const ScreenQRScanner: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full h-full min-h-[740px] flex-1 flex flex-col justify-between bg-black text-white overflow-hidden select-none">
+    <div className="relative w-full min-h-screen min-h-[100dvh] flex-1 flex flex-col justify-between bg-black text-white overflow-hidden select-none">
       {/* Hidden processing canvas */}
       <canvas ref={canvasRef} className="hidden" />
 
@@ -497,7 +497,7 @@ export const ScreenQRScanner: React.FC = () => {
       )}
 
       {/* BOTTOM CONTROLS BAR: Flashlight & Instructions */}
-      <footer className="relative z-20 px-6 pb-6 pt-3 flex flex-col items-center gap-4 bg-gradient-to-t from-black/85 via-black/50 to-transparent">
+      <footer className="relative z-20 px-6 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] pt-3 flex flex-col items-center gap-4 bg-gradient-to-t from-black/85 via-black/50 to-transparent">
         {/* Helper Chip */}
         <div className="px-3.5 py-1 rounded-full bg-black/60 border border-white/15 backdrop-blur-md text-[11px] font-medium text-white/90 shadow-sm flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -543,7 +543,7 @@ export const ScreenQRScanner: React.FC = () => {
 
       {/* SUCCESS MODAL / SHEET: When QR is Detected */}
       {scannedResult && (
-        <div className="absolute inset-x-0 bottom-0 z-40 bg-white dark:bg-slate-900 text-black dark:text-white rounded-t-3xl shadow-2xl p-5 border-t border-slate-200 dark:border-slate-800 animate-slide-up transition-colors duration-200">
+        <div className="absolute inset-x-0 bottom-0 z-40 bg-white dark:bg-slate-900 text-black dark:text-white rounded-t-3xl shadow-2xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] border-t border-slate-200 dark:border-slate-800 animate-slide-up transition-colors duration-200">
           <div className="w-10 h-1 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto mb-3" />
 
           <div className="flex items-start justify-between gap-3">
@@ -640,7 +640,7 @@ export const ScreenQRScanner: React.FC = () => {
       )}
       {/* Floating Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-2xl animate-fade-in flex items-center gap-2 border border-white/20 whitespace-nowrap pointer-events-none">
+        <div className="fixed bottom-[calc(6rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-2xl animate-fade-in flex items-center gap-2 border border-white/20 whitespace-nowrap pointer-events-none">
           <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
           <span>{toastMessage}</span>
         </div>

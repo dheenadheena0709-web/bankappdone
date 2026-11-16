@@ -185,14 +185,14 @@ export const DEFAULT_USER: User = {
   transactions: INITIAL_LEDGER_TRANSACTIONS
 };
 
-// 2. NEW USER - Raja gopal
+// 2. NEW USER - Raja Gopal
 export const RAJA_GOPAL_USER: User = {
   id: 'user-002',
   accountNo: '002198547321',
   accountNumber: '002198547321',
   fullAccountNumber: '002198547321',
-  name: 'Raja gopal',
-  holderName: 'Raja gopal',
+  name: 'Raja Gopal',
+  holderName: 'Raja Gopal',
   accountName: 'SAVINGS ACCOUNT - PREMIER',
   accountType: 'Premier Savings Account',
   type: 'SAVINGS',
@@ -221,13 +221,13 @@ export const RAJA_GOPAL_USER: User = {
     maskedNumber: '•••• •••• •••• 7709',
     cvv: '528',
     expiry: '09/30',
-    holder: 'Raja gopal',
+    holder: 'Raja Gopal',
     status: 'Active'
   },
   transactions: RAJA_GOPAL_TRANSACTIONS
 };
 
-// Active Accounts: Raja gopal & Sirajudeen Mohamed Sharif
+// Active Accounts: Raja Gopal & Sirajudeen Mohamed Sharif
 export const INITIAL_USERS: User[] = [RAJA_GOPAL_USER, DEFAULT_USER];
 
 // Helper for future member creation (ready for 30 members)
@@ -323,7 +323,7 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Central Users List - contains only the savings member
   const [users, setUsers] = useState<User[]>(INITIAL_USERS);
 
-  // Central Current User State (defaults to newly opened account: Raja gopal)
+  // Central Current User State (defaults to newly opened account: Raja Gopal)
   const [currentUser, setCurrentUser] = useState<User>(() => {
     if (typeof window !== 'undefined' && window.localStorage) {
       const storedId = localStorage.getItem('hsbc_current_user_id');
@@ -422,7 +422,7 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return null;
     }
 
-    // 1. Match Raja gopal account (password: 733926)
+    // 1. Match Raja Gopal account (password: 733926)
     if (
       cleanPass === '733926' ||
       cleanPass === RAJA_GOPAL_USER.password ||
@@ -486,7 +486,7 @@ export const BankProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return null;
     }
 
-    // 1. Match Raja gopal PIN (733926)
+    // 1. Match Raja Gopal PIN (733926)
     if (cleanPin === '733926' || cleanPin === RAJA_GOPAL_USER.pin || cleanPin === RAJA_GOPAL_USER.password) {
       const rajaUser: User = {
         ...RAJA_GOPAL_USER,

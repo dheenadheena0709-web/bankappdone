@@ -7,7 +7,7 @@ export const Screen0Welcome: React.FC = () => {
   const [showOpenAccountModal, setShowOpenAccountModal] = useState(false);
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col justify-between overflow-hidden bg-[#0A3D62] text-white select-none">
+    <div className="relative min-h-screen min-h-[100dvh] w-full flex flex-col justify-between overflow-hidden bg-[#0A3D62] text-white select-none">
       {/* Background Image: Dal Lake Srinagar, Kashmir with Shikara boat and snow mountains */}
       <div className="absolute inset-0 z-0">
         <img

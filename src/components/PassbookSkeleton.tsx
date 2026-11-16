@@ -3,9 +3,9 @@ import { ArrowLeft, Printer, Download } from 'lucide-react';
 
 export const PassbookSkeleton: React.FC = () => {
   return (
-    <div className="flex-1 flex flex-col justify-between bg-[#F5F5F5] min-h-[740px] text-black animate-pulse">
+    <div className="flex-1 flex flex-col justify-between bg-[#F5F5F5] dark:bg-slate-950 min-h-screen min-h-[100dvh] text-black dark:text-white pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] w-full max-w-full overflow-x-hidden animate-pulse">
       {/* Top Header Background: #DB0011 */}
-      <div className="bg-[#DB0011] text-white px-4 py-3 flex items-center justify-between shadow-sm">
+      <div className="bg-[#DB0011] dark:bg-slate-900 text-white px-4 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-2">
           <div className="p-1 -ml-1 text-white opacity-80">
             <ArrowLeft className="w-5 h-5" />
@@ -28,9 +28,9 @@ export const PassbookSkeleton: React.FC = () => {
       </div>
 
       {/* Filter / Search Bar Skeleton */}
-      <div className="px-3 py-2 bg-slate-200 border-b border-slate-300 flex items-center justify-between text-xs">
-        <div className="h-8 w-64 bg-white/70 rounded-md animate-shimmer" />
-        <div className="w-24 h-4 bg-slate-300 rounded animate-shimmer" />
+      <div className="px-3 py-2 bg-slate-200 dark:bg-slate-900 border-b border-slate-300 dark:border-slate-800 flex items-center justify-between gap-2 text-xs">
+        <div className="h-8 flex-1 min-w-0 max-w-xs bg-white/70 dark:bg-slate-800 rounded-md animate-shimmer" />
+        <div className="w-24 h-4 bg-slate-300 dark:bg-slate-700 rounded animate-shimmer shrink-0" />
       </div>
 
       {/* Physical Passbook Container Skeleton */}

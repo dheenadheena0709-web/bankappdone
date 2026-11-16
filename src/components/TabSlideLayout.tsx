@@ -90,14 +90,14 @@ export const TabSlideLayout: React.FC<TabSlideLayoutProps> = ({ children }) => {
   const showBottomNav = isTabRoute(location.pathname);
 
   return (
-    <div className="relative w-full min-h-screen bg-[#F5F5F5] dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-x-hidden flex flex-col justify-between transition-colors duration-200">
+    <div className="relative w-full min-h-screen min-h-[100dvh] bg-[#F5F5F5] dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-x-hidden flex flex-col justify-between transition-colors duration-200">
       {/* Sliding Panes Container */}
-      <div className="relative w-full flex-1 overflow-x-hidden">
+      <div className="relative w-full flex-1 flex flex-col overflow-x-hidden">
         {/* Outgoing view during the 350ms transition (no hard cut) */}
         {isTransitioning && previousLocation && (
           <div
             key={`prev-${previousLocation.pathname}`}
-            className={`absolute inset-0 w-full min-h-full z-10 pointer-events-none transform-gpu ${
+            className={`absolute inset-0 w-full min-h-full flex flex-col z-10 pointer-events-none transform-gpu ${
               direction === 'forward'
                 ? 'tab-slide-pane-out-left'
                 : 'tab-slide-pane-out-right'
@@ -110,7 +110,7 @@ export const TabSlideLayout: React.FC<TabSlideLayoutProps> = ({ children }) => {
         {/* Incoming view during 350ms transition, or static view when settled */}
         <div
           key={`curr-${currentLocation.pathname}`}
-          className={`w-full min-h-full ${
+          className={`w-full flex-1 flex flex-col min-h-full ${
             isTransitioning
               ? `relative z-20 transform-gpu ${
                   direction === 'forward'

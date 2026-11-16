@@ -89,7 +89,7 @@ export const INITIAL_LEDGER_TRANSACTIONS: Transaction[] = [
   }
 ];
 
-// Transaction History for Raja gopal: 2 transactions with clean list title & details on click
+// Transaction History for Raja Gopal: 2 transactions with clean list title & details on click
 export const RAJA_GOPAL_TRANSACTIONS: Transaction[] = [
   {
     id: 'tx-raja-02',

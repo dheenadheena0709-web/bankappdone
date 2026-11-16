@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Lock, AlertCircle, Phone, X } from 'lucide-react';
 
 interface AccountFrozenModalProps {
@@ -57,10 +58,10 @@ export const AccountFrozenModal: React.FC<AccountFrozenModalProps> = ({
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 xs:p-4 animate-in fade-in duration-200">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 xs:p-4 animate-in fade-in duration-200">
       <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-xs xs:max-w-sm overflow-hidden shadow-2xl border border-red-200 dark:border-red-900/40 text-center relative transition-colors duration-200">
         {/* Top Red Bar */}
         <div className="h-1.5 bg-[#DB0011] w-full" />
@@ -114,6 +115,7 @@ export const AccountFrozenModal: React.FC<AccountFrozenModalProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

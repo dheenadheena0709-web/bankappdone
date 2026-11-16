@@ -71,7 +71,7 @@ export const Screen10Passbook: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col justify-between bg-[#F5F5F5] dark:bg-slate-950 min-h-screen min-h-[100dvh] text-black dark:text-white animate-fade-in pb-24 transition-colors duration-200 overflow-x-hidden w-full max-w-full">
+    <div className="flex-1 flex flex-col justify-between bg-[#F5F5F5] dark:bg-slate-950 min-h-screen min-h-[100dvh] text-black dark:text-white animate-fade-in pb-[calc(6rem+env(safe-area-inset-bottom,0px))] transition-colors duration-200 overflow-x-hidden w-full max-w-full">
       {/* Top Header Background: #DB0011 */}
       <div className="bg-[#DB0011] dark:bg-slate-900 text-white px-3 xs:px-4 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-3 flex items-center justify-between shadow-sm border-b dark:border-slate-800 print:hidden transition-colors duration-200 w-full">
         <div className="flex items-center gap-2">
@@ -143,13 +143,13 @@ export const Screen10Passbook: React.FC = () => {
           {/* PHYSICAL PASSBOOK HEADER */}
           <div className="p-3 sm:p-4 border-b-2 border-slate-400 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-300 dark:border-slate-800 pb-2">
-              <div className="flex items-center gap-2">
-                <div className="p-0.5 bg-[#DB0011] rounded">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="p-0.5 bg-[#DB0011] rounded shrink-0">
                   <BrandLogo size="sm" variant="red" />
                 </div>
-                <div>
-                  <h1 className="text-sm sm:text-base font-black tracking-tight text-black dark:text-white uppercase">
-                    HSBC mPassbook | Acc: {userAccount.accountNumber || userAccount.accountNo || '002197782010'}
+                <div className="min-w-0">
+                  <h1 className="text-sm sm:text-base font-black tracking-tight text-black dark:text-white uppercase truncate">
+                    HSBC mPassbook | Acc: {userAccount.accountNumber || userAccount.accountNo || '002198547321'}
                   </h1>
                   <p className="text-[10px] text-slate-600 dark:text-slate-400 font-sans font-medium">
                     Branch: {userAccount.branch || 'HSBC Fort Main Branch, Mumbai'} · IFSC: {userAccount.ifsc || 'HSBC0400002'}{(userAccount.micrCode || userAccount.micr) ? ` · MICR: ${userAccount.micrCode || userAccount.micr}` : ''}
@@ -158,7 +158,7 @@ export const Screen10Passbook: React.FC = () => {
               </div>
 
               {/* Ink Stamp Badge in Blue/Red */}
-              <div className="border border-[#DB0011] rounded px-2 py-0.5 text-[9px] text-[#DB0011] uppercase tracking-widest font-sans font-bold flex items-center gap-1 rotate-[-2deg]">
+              <div className="border border-[#DB0011] rounded px-2 py-0.5 text-[9px] text-[#DB0011] uppercase tracking-widest font-sans font-bold flex items-center gap-1 rotate-[-2deg] shrink-0">
                 <Stamp className="w-3 h-3 text-[#DB0011]" />
                 <span>OFFICIAL DIGITAL LEDGER</span>
               </div>

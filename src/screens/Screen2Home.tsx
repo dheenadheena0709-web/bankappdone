@@ -62,11 +62,11 @@ export const Screen2Home: React.FC = () => {
 
   // Personal Savings Account
   const selectedAccount: User = currentUser || userAccount || DEFAULT_USER;
-  const currentAccNumber = selectedAccount.accountNo || selectedAccount.accountNumber || '002197782010';
+  const currentAccNumber = selectedAccount.accountNo || selectedAccount.accountNumber || '002198547321';
   const currentAccName = selectedAccount.accountName || 'SAVINGS ACCOUNT - PREMIER';
   const currentBalance = selectedAccount.balance;
   const currentAccCategory = 'Premier';
-  const displayName = selectedAccount.holderName || selectedAccount.name || 'Sirajudeen Mohamed Sharif';
+  const displayName = selectedAccount.holderName || selectedAccount.name || 'Raja Gopal';
   const userInitials = displayName
     .split(' ')
     .filter(Boolean)
@@ -145,7 +145,7 @@ export const Screen2Home: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col justify-between bg-[#F8F9FA] dark:bg-slate-950 min-h-screen min-h-[100dvh] text-slate-900 dark:text-slate-100 pb-28 animate-fade-in transition-colors duration-200 overflow-x-hidden w-full max-w-full">
+    <div className="flex-1 flex flex-col justify-between bg-[#F8F9FA] dark:bg-slate-950 min-h-screen min-h-[100dvh] text-slate-900 dark:text-slate-100 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] animate-fade-in transition-colors duration-200 overflow-x-hidden w-full max-w-full">
       {/* ================= TOP HEADER (HSBC CORPORATE / PREMIER RED + GLASSMORPHISM) ================= */}
       <header className="bg-gradient-to-b from-[#E30613] via-[#D80512] to-[#C90410] dark:from-[#b8040f] dark:via-[#9e030c] dark:to-[#850209] text-white pt-[max(0.5rem,env(safe-area-inset-top,0px))] pb-6 shadow-[0_8px_30px_rgba(227,6,19,0.22)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)] relative overflow-hidden transition-colors duration-200 w-full">
         {/* Subtle decorative atmospheric glow in header */}
@@ -262,13 +262,13 @@ export const Screen2Home: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.03] to-white/[0.12] pointer-events-none" />
 
           {/* Top Row: Account Name, Active Badge & Toggle Visibility */}
-          <div className="relative z-10 flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-black tracking-wider text-white/90 uppercase block font-sans">
+          <div className="relative z-10 flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 xs:gap-2 flex-wrap">
+                <span className="text-[10.5px] xs:text-[11px] font-black tracking-wider text-white/90 uppercase block font-sans truncate">
                   {currentAccName}
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase backdrop-blur-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                <span className="inline-flex items-center gap-1.5 px-2 xs:px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-wider uppercase backdrop-blur-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full animate-pulse bg-emerald-400" />
                   <span>ACTIVE</span>
                 </span>
@@ -283,7 +283,7 @@ export const Screen2Home: React.FC = () => {
             </div>
 
             {/* Right side: EMV Chip + Eye/EyeOff */}
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2 shrink-0">
               {/* EMV Gold Chip Icon */}
               <div className="w-8 h-6 rounded-md bg-gradient-to-br from-[#E6C665] via-[#C9A237] to-[#8C6D1F] border border-[#FFE58F]/70 p-0.5 shadow-xs flex items-center justify-center opacity-90">
                 <div className="w-full h-full border border-amber-950/30 rounded-xs flex flex-col justify-center gap-0.5 px-0.5">
@@ -327,15 +327,15 @@ export const Screen2Home: React.FC = () => {
           </div>
 
           {/* Bottom Row of Card: Holder Name, Contactless & Category */}
-          <div className="relative z-10 mt-5 pt-3 border-t border-white/10 flex items-center justify-between text-white/70 text-[10px]">
-            <div className="flex items-center gap-2">
-              <span className="font-mono font-bold tracking-widest text-white/95 uppercase text-xs">
+          <div className="relative z-10 mt-5 pt-3 border-t border-white/10 flex items-center justify-between gap-2 text-white/70 text-[10px]">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="font-mono font-bold tracking-widest text-white/95 uppercase text-xs truncate">
                 {displayName}
               </span>
             </div>
-            <div className="flex items-center gap-1.5 opacity-90">
+            <div className="flex items-center gap-1.5 opacity-90 shrink-0">
               <Wifi className="w-3.5 h-3.5 rotate-90 stroke-[2.2] text-[#FFE58F]" />
-              <span className="font-bold tracking-widest text-[9px] uppercase text-[#FFE58F]">
+              <span className="font-bold tracking-widest text-[9px] uppercase text-[#FFE58F] whitespace-nowrap">
                 Premier Savings
               </span>
             </div>
@@ -782,9 +782,11 @@ export const Screen2Home: React.FC = () => {
         )}
 
       {/* ================= ACCOUNT DETAILS MODAL / POPUP ================= */}
-      {showAccountDetailsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh] animate-scale-up">
+      {showAccountDetailsModal &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/65 backdrop-blur-sm animate-fade-in">
+            <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh] animate-scale-up">
             {/* Modal Header */}
             <div className="px-5 py-4 bg-gradient-to-r from-[#2D0206] via-[#1B0104] to-[#0A0002] text-white flex items-center justify-between border-b border-[#D4AF37]/50">
               <div className="flex items-center gap-3">
@@ -997,13 +999,16 @@ export const Screen2Home: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ================= NOTIFICATIONS MODAL ================= */}
-      {showNotifications && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-slide-up">
+      {showNotifications &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-slide-up">
             {/* Header */}
             <div className="p-4 bg-[#E30613] text-white flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -1079,13 +1084,16 @@ export const Screen2Home: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ================= SMS ALERTS MODAL ================= */}
-      {showSmsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-slide-up">
+      {showSmsModal &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-slide-up">
             <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="p-1.5 bg-white/10 rounded-lg">
@@ -1132,12 +1140,13 @@ export const Screen2Home: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Floating Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-xl border border-slate-700 animate-fade-in flex items-center gap-2">
+        <div className="fixed bottom-[calc(6rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-50 bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-xl border border-slate-700 animate-fade-in flex items-center gap-2 whitespace-nowrap">
           <span>{toastMessage}</span>
         </div>
       )}

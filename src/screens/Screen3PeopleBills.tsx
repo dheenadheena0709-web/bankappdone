@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { BottomNav } from '../components/BottomNav';
 import { PayeeContact } from '../constants/mockData';
@@ -273,7 +274,7 @@ export const Screen3PeopleBills: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col justify-between bg-[#F5F5F5] dark:bg-slate-950 min-h-screen min-h-[100dvh] text-slate-900 dark:text-slate-100 pb-28 transition-colors duration-200 overflow-x-hidden w-full max-w-full">
+    <div className="flex-1 flex flex-col justify-between bg-[#F5F5F5] dark:bg-slate-950 min-h-screen min-h-[100dvh] text-slate-900 dark:text-slate-100 pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] transition-colors duration-200 overflow-x-hidden w-full max-w-full">
       {/* Top Red Header #DB0011 "Move Money" */}
       <header className="bg-[#DB0011] dark:bg-slate-900 text-white px-4 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-5 shadow-sm border-b dark:border-slate-800 transition-colors duration-200 w-full">
         <div className="flex items-center justify-between mb-1">
@@ -364,21 +365,21 @@ export const Screen3PeopleBills: React.FC = () => {
             </span>
           </div>
 
-          <div className="grid grid-cols-4 gap-2 bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
+          <div className="grid grid-cols-4 gap-1.5 xs:gap-2 bg-white dark:bg-slate-900 p-3 xs:p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
             {mainBillServices.map((service) => {
               const IconComp = service.icon;
               return (
                 <button
                   key={service.id}
                   onClick={() => openBillModal(service.id)}
-                  className="flex flex-col items-center p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 active:scale-95 transition cursor-pointer group text-center"
+                  className="min-w-0 flex flex-col items-center p-1.5 xs:p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 active:scale-95 transition cursor-pointer group text-center"
                 >
                   <div
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center mb-1.5 transition-transform group-hover:scale-105 ${service.color} dark:bg-slate-800 dark:text-slate-200`}
+                    className={`w-10 h-10 xs:w-11 xs:h-11 rounded-xl flex items-center justify-center mb-1.5 transition-transform group-hover:scale-105 ${service.color} dark:bg-slate-800 dark:text-slate-200`}
                   >
-                    <IconComp className="w-5 h-5" />
+                    <IconComp className="w-4.5 h-4.5 xs:w-5 xs:h-5" />
                   </div>
-                  <span className="text-[11px] font-bold text-slate-900 dark:text-slate-100 leading-tight">
+                  <span className="text-[10px] xs:text-[11px] font-bold text-slate-900 dark:text-slate-100 leading-tight max-w-full break-words">
                     {service.name}
                   </span>
                 </button>
@@ -403,9 +404,11 @@ export const Screen3PeopleBills: React.FC = () => {
       </main>
 
       {/* BOTTOM SHEET MODAL: VIEW ALL BILLERS */}
-      {selectedBillType === 'all' && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end justify-center">
-          <div className="bg-white w-full max-w-md rounded-t-3xl p-5 shadow-2xl border-t border-slate-200 max-h-[88vh] flex flex-col animate-slide-up">
+      {selectedBillType === 'all' &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-xs flex items-end justify-center">
+            <div className="bg-white w-full max-w-md rounded-t-3xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] shadow-2xl border-t border-slate-200 max-h-[88vh] flex flex-col animate-slide-up">
             {/* Drag Handle */}
             <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-3 shrink-0" />
 
@@ -470,13 +473,17 @@ export const Screen3PeopleBills: React.FC = () => {
               })}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* BOTTOM SHEET MODAL: FLOW B - INDEPENDENT MULTI-STEP BILL PAYMENT FLOW */}
-      {selectedBillType && selectedBillType !== 'all' && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end justify-center">
-          <div className="bg-white w-full max-w-md rounded-t-3xl p-5 shadow-2xl border-t border-slate-200 max-h-[90vh] overflow-y-auto flex flex-col animate-slide-up">
+      {selectedBillType &&
+        selectedBillType !== 'all' &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-xs flex items-end justify-center">
+            <div className="bg-white w-full max-w-md rounded-t-3xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom,0px))] shadow-2xl border-t border-slate-200 max-h-[90vh] overflow-y-auto flex flex-col animate-slide-up">
             {/* Drag Handle */}
             <div className="w-10 h-1 bg-slate-300 rounded-full mx-auto mb-3 shrink-0" />
 
@@ -1209,13 +1216,16 @@ export const Screen3PeopleBills: React.FC = () => {
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* FLOW A: ADD PAYEE MODAL */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm p-4 shadow-xl text-left border border-slate-200 animate-slide-up">
+      {showAddModal &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl w-full max-w-sm p-4 shadow-xl text-left border border-slate-200 animate-slide-up">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-3">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-red-50 text-[#DB0011] flex items-center justify-center font-bold">
@@ -1290,12 +1300,13 @@ export const Screen3PeopleBills: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Floating Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-xl animate-fade-in flex items-center gap-2">
+        <div className="fixed bottom-[calc(6rem+env(safe-area-inset-bottom,0px))] left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-xl animate-fade-in flex items-center gap-2 whitespace-nowrap">
           <span>{toastMessage}</span>
         </div>
       )}

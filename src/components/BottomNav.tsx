@@ -72,7 +72,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTabOverride }) => {
   return (
     <nav
       aria-label="Bottom Navigation"
-      className="fixed bottom-[calc(10px+env(safe-area-inset-bottom,0px))] inset-x-2 xs:inset-x-3 max-w-md mx-auto w-[calc(100%-16px)] xs:w-[calc(100%-24px)] z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-full shadow-[0_16px_40px_rgba(0,0,0,0.14),0_4px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.5),0_4px_12px_rgba(0,0,0,0.3)] border border-slate-200/80 dark:border-slate-800 px-1.5 xs:px-2 py-1.5 transition-all select-none"
+      className="fixed bottom-[calc(10px+env(safe-area-inset-bottom,0px))] left-0 right-0 mx-auto w-[calc(100%-16px)] xs:w-[calc(100%-24px)] max-w-[456px] z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-full shadow-[0_16px_40px_rgba(0,0,0,0.14),0_4px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.5),0_4px_12px_rgba(0,0,0,0.3)] border border-slate-200/80 dark:border-slate-800 px-1.5 xs:px-2 py-1.5 transition-all select-none"
     >
       <div className="grid grid-cols-5 items-center w-full">
         {navItems.map((item) => {

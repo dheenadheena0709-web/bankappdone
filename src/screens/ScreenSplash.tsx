@@ -190,7 +190,7 @@ export const ScreenSplash: React.FC = () => {
   return (
     <div
       onClick={handleSkip}
-      className="splash-screen-container relative w-full min-h-screen overflow-hidden select-none cursor-pointer flex flex-col items-center justify-center"
+      className="splash-screen-container relative w-full min-h-screen min-h-[100dvh] overflow-hidden select-none cursor-pointer flex flex-col items-center justify-center"
       style={{
         background: 'linear-gradient(180deg, #030814 0%, #061128 40%, #030816 75%, #010307 100%)',
       }}
@@ -417,7 +417,7 @@ export const ScreenSplash: React.FC = () => {
       </div>
 
       {/* Discreet Skip Button (for quick testing without waiting) */}
-      <div className="absolute bottom-6 right-6 z-20">
+      <div className="absolute bottom-[max(1.5rem,env(safe-area-inset-bottom,0px))] right-5 xs:right-6 z-20">
         <button
           onClick={(e) => {
             e.stopPropagation();

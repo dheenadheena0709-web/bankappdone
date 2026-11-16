@@ -74,21 +74,21 @@ export const Screen9Profile: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col justify-between bg-[#F5F5F5] dark:bg-slate-950 min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-200">
+    <div className="flex-1 flex flex-col justify-between bg-[#F5F5F5] dark:bg-slate-950 min-h-screen min-h-[100dvh] pb-[calc(6.5rem+env(safe-area-inset-bottom,0px))] w-full max-w-full overflow-x-hidden text-slate-900 dark:text-slate-100 transition-colors duration-200">
       {/* Header Background: #DB0011 */}
-      <header className="bg-[#DB0011] dark:bg-slate-900 text-white px-4 pt-3 pb-4 shadow-sm border-b dark:border-slate-800 transition-colors duration-200">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
+      <header className="bg-[#DB0011] dark:bg-slate-900 text-white px-4 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-4 shadow-sm border-b dark:border-slate-800 transition-colors duration-200 w-full">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
             <button
               onClick={() => navigate('/home')}
-              className="p-1 -ml-1 text-white hover:bg-black/10 rounded-lg transition cursor-pointer"
+              className="p-1 -ml-1 text-white hover:bg-black/10 rounded-lg transition cursor-pointer shrink-0"
               aria-label="Back"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <h1 className="text-xl font-bold tracking-tight">My details & Settings</h1>
+            <h1 className="text-lg xs:text-xl font-bold tracking-tight truncate">My details & Settings</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 xs:gap-2 shrink-0">
             <button
               onClick={toggleDarkMode}
               className="p-1.5 rounded-lg bg-black/15 hover:bg-black/25 text-white transition cursor-pointer"
@@ -99,7 +99,7 @@ export const Screen9Profile: React.FC = () => {
             </button>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1 text-xs text-white/90 hover:text-white bg-black/15 px-2.5 py-1 rounded-md transition cursor-pointer font-bold"
+              className="flex items-center gap-1 text-xs text-white/90 hover:text-white bg-black/15 px-2.5 py-1 rounded-md transition cursor-pointer font-bold whitespace-nowrap"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Log out</span>
@@ -123,7 +123,7 @@ export const Screen9Profile: React.FC = () => {
           <div className="flex items-center justify-between mb-2.5">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-2xl bg-[#DB0011] text-white flex items-center justify-center text-sm font-black shadow-md">
-                {(userAccount.holderName || userAccount.name || 'Raja gopal')
+                {(userAccount.holderName || userAccount.name || 'Raja Gopal')
                   .split(' ')
                   .filter(Boolean)
                   .map((w: string) => w[0])
@@ -133,7 +133,7 @@ export const Screen9Profile: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                  {userAccount.holderName || userAccount.name || 'Raja gopal'}
+                  {userAccount.holderName || userAccount.name || 'Raja Gopal'}
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
                   A/C: {userAccount.accountNumber || userAccount.accountNo || '002198547321'}
@@ -147,24 +147,24 @@ export const Screen9Profile: React.FC = () => {
           </div>
 
           {/* Quick Details Grid: Phone, Email, PAN */}
-          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200/80 dark:border-slate-800 text-[11px]">
-            <div className="p-2 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-medium">Mobile / Phone</span>
-              <strong className="font-mono block text-[9.5px] leading-tight text-slate-900 dark:text-slate-100 font-bold tracking-tight">
+          <div className="grid grid-cols-3 gap-1.5 xs:gap-2 pt-2 border-t border-slate-200/80 dark:border-slate-800 text-[11px]">
+            <div className="min-w-0 p-2 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-medium truncate">Mobile / Phone</span>
+              <strong className="font-mono block text-[9.5px] leading-tight text-slate-900 dark:text-slate-100 font-bold tracking-tight truncate">
                 {userAccount.phone || userAccount.mobile || '7339267709'}
               </strong>
             </div>
 
-            <div className="p-2 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60">
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-medium">Email</span>
+            <div className="min-w-0 p-2 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-medium truncate">Email</span>
               <strong className="text-slate-900 dark:text-slate-100 truncate block text-[10px]">
                 {userAccount.email || 'gcrtech.raja@gmail.com'}
               </strong>
             </div>
 
-            <div className="p-2 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60">
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-medium">PAN Number</span>
-              <strong className="font-mono text-slate-900 dark:text-slate-100 truncate block">
+            <div className="min-w-0 p-2 rounded-lg bg-white/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-medium truncate">PAN Number</span>
+              <strong className="font-mono text-slate-900 dark:text-slate-100 truncate block text-[10px]">
                 {userAccount.panNumber || userAccount.panNo || 'AVVPR5087J'}
               </strong>
             </div>
@@ -215,7 +215,7 @@ export const Screen9Profile: React.FC = () => {
               <div className="px-3.5 pb-3.5 pt-1 bg-slate-50/70 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800/80 animate-fade-in space-y-1.5 text-xs">
                 <div className="flex justify-between py-1 border-b border-slate-200/50 dark:border-slate-700/50">
                   <span className="text-slate-500 dark:text-slate-400">Full Name</span>
-                  <strong className="text-slate-900 dark:text-slate-100">{userAccount.holderName || userAccount.name || 'Raja gopal'}</strong>
+                  <strong className="text-slate-900 dark:text-slate-100">{userAccount.holderName || userAccount.name || 'Raja Gopal'}</strong>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-200/50 dark:border-slate-700/50">
                   <span className="text-slate-500 dark:text-slate-400">Account Number</span>
@@ -738,7 +738,7 @@ export const Screen9Profile: React.FC = () => {
                   <>
                     <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
                       <span className="text-slate-500 dark:text-slate-400">Full Name</span>
-                      <strong className="text-black dark:text-white">{userAccount.holderName || userAccount.name || 'Raja gopal'}</strong>
+                      <strong className="text-black dark:text-white">{userAccount.holderName || userAccount.name || 'Raja Gopal'}</strong>
                     </div>
                     <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
                       <span className="text-slate-500 dark:text-slate-400">Account Number</span>
